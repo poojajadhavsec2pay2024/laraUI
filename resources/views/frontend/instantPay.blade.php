@@ -490,11 +490,77 @@
                                        <path d="M9 11h6"></path>
                                     </svg>                               
                                     </span>
-                                    <input id="transferAmount" type="text"  name="transferAmount" autocomplete="off" placeholder="Amount" data-validetta="required" onkeypress="return addAmount(event,this.id)" class="form-control field-disable" data-vd-message-required="Please enter amount">
+                                    <input id="transferAmount" type="number"  name="transferAmount" autocomplete="off" placeholder="Amount" onkeypress="return addAmount(event,this.id)" class="form-control field-disable" data-vd-message-required="Please enter amount">
                                </div>
-                            </div class="text-end">
-                            <button class="btn btn-primary" type="button" id="mobilebtn" name="mobilebtn">Get OTP</button>
-                            </div>
+                               <div class="row mb-3" style="display:none" id="servicecharge"> 
+                                    <div class="d-flex p-0">
+                                       <div class="form-selectgroup-label d-flex align-items-center p-3">
+                                        
+                                            <div class="form-group col-6 mb-3">
+                                              <label class="form-label mb-0">Transfer Amount</label>
+                                                <div class="d-flex">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-currency-rupee" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                                    <path d="M18 5h-11h3a4 4 0 0 1 0 8h-3l6 6"></path>
+                                                    <path d="M7 9l11 0"></path>
+                                                    </svg>
+                                                    <code id="transamount">-</code>
+                                                </div>
+                                                        
+                                                <label class="form-label mb-0">Receiver Collection Amount</label>
+                                                <div class="d-flex">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-currency-rupee" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                                    <path d="M18 5h-11h3a4 4 0 0 1 0 8h-3l6 6"></path>
+                                                    <path d="M7 9l11 0"></path>
+                                                    </svg>
+                                                        <code id="payoutamount">-</code>
+                                                </div> 
+                                                <label class="form-label mb-0">Exchange Rate</label>
+                                                <div class="d-flex">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-currency-rupee" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                                    <path d="M18 5h-11h3a4 4 0 0 1 0 8h-3l6 6"></path>
+                                                    <path d="M7 9l11 0"></path>
+                                                    </svg>
+                                                        <code id="exchangerate">-</code>
+                                                </div> 
+                                           </div>
+                                           </br></br>
+                                           <div class="form-group col-6 mb-3">
+
+                                           <label class="form-label mb-0">Service Charge</label>
+                                                <div class="d-flex">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-currency-rupee" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                                    <path d="M18 5h-11h3a4 4 0 0 1 0 8h-3l6 6"></path>
+                                                    <path d="M7 9l11 0"></path>
+                                                    </svg>
+                                                        <code id="service_charge">-</code>
+                                                </div>
+                                                <label class="form-label mb-0">Sender collection Amount</label>
+                                                <div class="d-flex">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-currency-rupee" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                                    <path d="M18 5h-11h3a4 4 0 0 1 0 8h-3l6 6"></path>
+                                                    <path d="M7 9l11 0"></path>
+                                                    </svg>
+                                                        <code id="collectionamount">-</code>
+                                                </div>
+                                               
+                                            </div>
+                                            
+                                            
+
+
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                            
+                                </div class="text-end">
+                                <button class="btn btn-primary" type="button" id="mobilebtn" name="mobilebtn">Get OTP</button>
+                                </div>
                             <div class="row" id="submitotpblock_fundtransfer" style="display:none">
                                 <div class="form-group col-6 mb-3">
                                     <label class="form-label required text-muted">Enter OTP</label>
@@ -1289,7 +1355,7 @@
         }
         function btnSendmoney(sendname,sendmobile,bene_id,bene_name,bene_mobile,bene_account,bene_paymentMode,bankBranchId)
             {
-             alert(sendname+sendmobile+bene_id+bene_name+bene_mobile+bene_account+bene_paymentMode+bankBranchId);
+             //alert(sendname+sendmobile+bene_id+bene_name+bene_mobile+bene_account+bene_paymentMode+bankBranchId);
                     var mobileno = $('#mobile').val();
                             
                             $("#offcanvasEndLabel").text("Send Money");
@@ -1324,16 +1390,64 @@
                         
                         
             
-            }
-            $("#mobilebtn").click(function(){
-                var mobile = $('#mobile').val();
-                var operation = $('#operation').val();
-                var beneficiaryId = $('#beneficiaryId').val();
-                var receiver_paymentMode = $('#receiver_paymentMode').val();
-                var rec_bankBranchId = $('#rec_bankBranchId').val();
-                var rec_account = $('#rec_account').val();
-                var transferAmount = $('#transferAmount').val();
-                  $("#mobilebtn").addClass('btn-loading');
+        }
+       
+        $("#transferAmount").on('input', function() {
+                  
+                    var paymentMode = $('#receiver_paymentMode').val();
+                    var bankBranchId = $('#rec_bankBranchId').val();
+                    var payoutAmount = $('#payoutAmount').val();
+                    var transferAmount2 = $('#transferAmount').val();  
+                    var country = 'Nepal';
+                    $.ajax({
+                        type: 'POST', // The HTTP method to use
+                        url: '{{ route('serviceCharge') }}', // The URL of the controller action to call
+                        data: {
+                            country: country,
+                            paymentMode: paymentMode,
+                            bankBranchId: bankBranchId, // Corrected variable name
+                            payoutAmount: payoutAmount,
+                            transferAmount: transferAmount2 // Use the updated value directly
+                        },
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: function(data) {
+                            if (data.act == "CONTINUE") {
+                                $('#servicecharge').show();
+                                $('#transamount').text($.trim(data.data.transferAmount));
+                                $('#service_charge').text($.trim(data.data.serviceCharge));
+                                $('#collectionamount').text($.trim(data.data.collectionAmount));
+                                $('#payoutamount').text($.trim(data.data.payoutAmount));
+                                $('#exchangerate').text($.trim(data.data.exchangeRate));
+                                
+                            } else if (data.act == "RETRY") {
+                                // $("#mobilebtn").removeClass('btn-loading');
+                                webToast.Danger({ status: 'Failed', message: data.message, delay: 3000, align: 'bottomright' });
+                            } else {
+                                webToast.Danger({ status: 'Failed', message: data.message, delay: 3000, align: 'bottomright' });
+                            }
+                        },
+                        error: function(jqXHR, textStatus, errorThrown) {
+                            if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
+                                var msg = jqXHR.responseJSON.message;
+                            } else {
+                                var msg = "Something went wrong (" + jqXHR.status + ")";
+                            }
+                            webToast.Danger({ status: 'Failed', message: msg, delay: 3000, align: 'bottomright' });
+                            $("#mobilebtn").removeClass('btn-loading');
+                        }
+                    });
+                });
+                 $("#mobilebtn").click(function(){
+                    var mobile = $('#mobile').val();
+                    var operation = $('#operation').val();
+                    var beneficiaryId = $('#beneficiaryId').val();
+                    var receiver_paymentMode = $('#receiver_paymentMode').val();
+                    var rec_bankBranchId = $('#rec_bankBranchId').val();
+                    var rec_account = $('#rec_account').val();
+                    var transferAmount = $('#transferAmount').val();
+                    $("#mobilebtn").addClass('btn-loading');
                     $.ajax({
                       type: 'POST', // The HTTP method to use
                       url: '{{ route('sendOtp') }}', // The URL of the controller action to call
@@ -1377,7 +1491,7 @@
                         $("#mobilebtn").removeClass('btn-loading');
                       }
                     });
-          });
+                });
 
        
             //datatable send money  button click
@@ -1540,5 +1654,7 @@
                     });
               }
             });
+
+            
         </script>
 @endsection

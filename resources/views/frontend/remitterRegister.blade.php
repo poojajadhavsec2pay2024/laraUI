@@ -7,7 +7,7 @@
 <link href="{{url('frontend/dist/css/webToast.min.css')}}" rel="stylesheet"/>
 <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">  
 <script type="text/javascript" src="{{url('frontend/dist/js/webToast.min.js')}}"></script>
-
+<script src="{{url('frontend/dist/js/validetta.min.js')}}"></script>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
 <div class="page-wrapper">

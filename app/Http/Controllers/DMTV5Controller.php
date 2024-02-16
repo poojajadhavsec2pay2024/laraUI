@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use app\Helpers\DMTV5Helper;
 use Session;
-use App\models\stateDistrict;
-use App\models\nepalDtateDistrict;
+use App\models\StateDistrict;
+use App\models\NepalDtateDistrict;
 use App\models\InstantPayRemitterReport;
 use App\models\Global_Settings;
 
@@ -658,7 +658,35 @@ class DMTV5Controller extends Controller
         $mockmode = false;
         $mockmodestatus="SUCCESS";//FAILED,PENDING
         $result = \DmtApiv5::serviceCharge($data, $mockmode,$mockmodestatus);
-        dd($result);
+        if($result['apistatus'] == 'DATA_FETCHED_SUCCESSFUL'){ 
+            $output['status'] = $result['status'];
+            $output['act'] = "CONTINUE";
+            $output['apistatus']=$result['apistatus'];
+            $output['apiremark']=$result['apiremark'];
+            $output['message'] = $result['message'];
+            $output['data']= $result['data'];
+            
+        }
+       
+        else if($result['apistatus'] == 'DATA_FETCHED_FAILED'){
+            
+            $output['status'] = $result['status'];
+            $output['act'] = "RETRY";
+            $output['apistatus']=$result['apistatus'];
+            $output['apiremark']=$result['apiremark'];
+            $output['message'] = $result['message'];
+            $output['data']= $result['data'];
+        }
+        else {
+            $output['status'] = "failed";
+            $output['act'] = "TERMINATE";
+            $output['apistatus']='API_CALLFAILED';
+            $output['message']= "Unknown resposne received. Please try again";
+            return response()->json($output,400);
+        }
+        return response()->json($output,200);
+    
+    
     
     }
     public function fundTransfer(Request $request)
@@ -669,7 +697,7 @@ class DMTV5Controller extends Controller
         $maxFloat=99999999999999999999999999;
         $min = (int)$minFloat;
         $max = (int)$maxFloat;
-        $externalRef = mt_rand($min, $max);
+        $externalRef =rand($min, $max);
         $data["externalRef"] = "$externalRef";
        
        // $data["externalRef"]=$externalRef;
@@ -685,6 +713,31 @@ class DMTV5Controller extends Controller
         //$data["longitude"]=$request->longitude;
         $mockmode = true;
         $mockmodestatus="SUCCESS";//FAILED,PENDING
+
+        $instantPay_RemitterReport =ReportDmt::create(['name'=>$request->name,
+           'gender'=>$request->gender,
+           'dob'=>$request->dob,
+           'address'=>$request->address,
+           'mobile'=>$request->mobileno,
+           'state'=>$request->state,
+           'district'=>$request->district,
+           'city'=>$request->city,
+           'nationality'=>$request->nationality,
+           'email'=>$request->email,
+           'employer'=>$request->employer,
+           'idType'=>$request->idType,
+           'idNumber'=>$request->idNumber,
+           'idExpiryDate'=>$request->idExpiryDate,
+           'idIssuedPlace'=>$request->idIssuedPlace,
+           'incomeSource'=>$request->incomeSource,
+           'remitterType'=>$request->remitterType,
+           'incomeSourceType'=>$request->incomeSourceType,
+           'annualIncome'=>$request->annualIncome,
+           'otp'=>$request->otp,
+           'status'=>'Pending',
+           'user_id'=>\Auth::id()
+        ]);
+            $insertedId = $instantPay_RemitterReport->id;
         $result = \DmtApiv5::fundTransfer($data, $mockmode,$mockmodestatus);
         
         if($result['apistatus'] == 'TRANSFER_SUCCESSFUL'){ 
@@ -752,7 +805,7 @@ class DMTV5Controller extends Controller
             }
          
             $user_id=\Auth::id();
-            $statedata = stateDistrict::distinct()->select('state','stateCode')->get();
+            $statedata = StateDistrict::distinct()->select('state','stateCode')->get();
             $remitterInfo = InstantPayRemitterReport::where('user_id',$user_id)->where('mobile',$mobile)->first();
             $version_value  = Global_Settings::get();
             $data['statedata']=$statedata;
@@ -781,7 +834,7 @@ class DMTV5Controller extends Controller
     public function getDistrict(Request $request)
     {
        // dd($request->statecode);
-            $data = stateDistrict::where('stateCode',$request->statecode)->distinct()->pluck('district');
+            $data = StateDistrict::where('stateCode',$request->statecode)->distinct()->pluck('district');
            // dd($data);
            $output['status']='success';
            $output['message']='District Fetch Successfully';
@@ -794,7 +847,7 @@ class DMTV5Controller extends Controller
     {
         if(\Auth::check())
         {    
-            $statedata = nepalDtateDistrict::distinct()->select('state','stateCode')->get();
+            $statedata = NepalDtateDistrict::distinct()->select('state','stateCode')->get();
             $data['statedata']=$statedata;
             return view('frontend.instantPay',compact('data'));
             //return view('frontend.instantPay');//blank
@@ -807,7 +860,7 @@ class DMTV5Controller extends Controller
     public function getNepalDistrict(Request $request)
     {
        // dd($request->statecode);
-            $data = nepalDtateDistrict::where('state',$request->state)->distinct()->pluck('district');
+            $data = NepalDtateDistrict::where('state',$request->state)->distinct()->pluck('district');
            // dd($data);
            $output['status']='success';
            $output['message']='District Fetch Successfully';
