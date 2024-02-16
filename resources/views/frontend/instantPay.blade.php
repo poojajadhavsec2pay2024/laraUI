@@ -11,8 +11,9 @@
 <script src="{{url('frontend/dist/js/validetta.min.js')}}"></script>
 <script type="text/javascript" src="{{url('frontend/dist/js/webToast.min.js')}}"></script>
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
-<script src="{{url('frontend/dist/js/customvalidation.js')}}"></script>
 
+<script src="{{url('frontend/dist/js/loadingoverlay.min.js')}}"></script>
+<script src="{{url('frontend/dist/js/customvalidation.js')}}"></script>
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <style>
         .border-left-custom{
@@ -461,8 +462,8 @@
                             <input type="hidden" id="rec_account" name="rec_account" value="">
                             <input type="hidden" id="receiver_mobile" name="receiver_mobile" value="">
                             <input type="hidden" id="receiver_paymentMode" name="receiver_paymentMode" value="">
-                            <input type="hidden" id="sen_name" name="sen_name1" value="">
-                            <input type="hidden" id="remitterMobile " name="remitterMobile " value="">
+                            <input type="hidden" id="sen_name" name="sen_name" value="">
+                            <input type="hidden" id="remitterMobile" name="remitterMobile" value="">
                             <input type="hidden" id="beneficiaryId" name="beneficiaryId" value="">
                             <div class="row">
                             <div>
@@ -511,7 +512,289 @@
       </div>
     </div>
     <!--OFFCANVAS END-->
+<!--Modal for charges confirmation-->
+<div class="modal modal-blur fade" id="modal-success" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <div class="modal-status bg-success"></div>
+          <div class="modal-body text-center py-4">
+                <div>
+                    <!-- Download SVG icon from http://tabler-icons.io/i/alert-triangle -->
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon alert-icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                        <path d="M12 9v2m0 4v.01"></path>
+                        <path d="M5 19h14a2 2 0 0 0 1.84 -2.75l-7.1 -12.25a2 2 0 0 0 -3.5 0l-7.1 12.25a2 2 0 0 0 1.75 2.75">
+                        </path>
+                    </svg>
+                </div>
+            <h3>Process Charges</h3>
+            <div class="text-muted">Name verification is paid Process. <br>Please click on Agree if you wish to continue.</div>
+          </div>
+          <div class="modal-footer">
+            <div class="w-100">
+              <div class="row">
+                <div class="col"><a id="btnProcessCancel" class="btn w-100 btn-danger" data-bs-dismiss="modal">
+                    Cancel
+                  </a></div>
+                <div class="col"><a id="btnProcessSubmit"  class="btn btn-success w-100" data-bs-dismiss="modal">
+                    Continue
+                  </a></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!--Send money confirmation-->
+    <div class="modal modal-blur fade" id="modal-send-money" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <div class="modal-status bg-success"></div>
+          <div class="modal-body text-center py-4">
+                <div>
+                    <!-- Download SVG icon from http://tabler-icons.io/i/alert-triangle -->
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon alert-icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                        <path d="M12 9v2m0 4v.01"></path>
+                        <path d="M5 19h14a2 2 0 0 0 1.84 -2.75l-7.1 -12.25a2 2 0 0 0 -3.5 0l-7.1 12.25a2 2 0 0 0 1.75 2.75">
+                        </path>
+                    </svg>
+                </div>
+            <h3>Process Charges</h3>
+            <div class="text-muted">Name verification is paid Process, this will charge you Rs.100. <br>Please click on Agree if you wish to continue.</div>
+          </div>
+          <div class="modal-footer">
+            <div class="w-100">
+              <div class="row">
+                <div class="col"><a id="btnCancelPayment" class="btn w-100 btn-danger" data-bs-dismiss="modal">
+                    Cancel
+                  </a></div>
+                <div class="col"><a id="btnProcessPayment"  class="btn btn-success w-100" data-bs-dismiss="modal">
+                    Continue
+                  </a></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!--Payment Success Modal-->
+    <div class="modal modal-blur fade" id="payment-success" tabindex="-1" role="dialog" aria-hidden="true" style="display: none">
+      <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <button type="button" id="payment-success-close" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <div class="modal-status bg-success"></div>
+          <div class="modal-body text-center py-4">
+            <!-- Download SVG icon from http://tabler-icons.io/i/circle-check -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon mb-2 text-green icon-lg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><circle cx="12" cy="12" r="9" /><path d="M9 12l2 2l4 -4" /></svg>
+            <h3 id="txn-heading">Payment succedeed</h3>
+            <div class="text-muted">Your payment of <span style="font-weight: bold">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-currency-rupee my-auto" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                   <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                   <path d="M18 5h-11h3a4 4 0 0 1 0 8h-3l6 6"></path>
+                   <path d="M7 9l11 0"></path>
+                </svg>
+                <span id="modalValue"></span>
+            </span>
+             <span ="payment-msg">has been successfully submitted.</span> </div>
+          </div>
+          <div class="modal-footer">
+            <div class="w-100">
+                <div class="row">
+                    <div class="col">
+                        <button href="#" class="btn w-100" data-bs-dismiss="modal">
+                            OK
+                        </button>
+                    </div>
+                    <div class="col">
+                        <button type="button"  id="printpaymentreceipt" class="btn btn-primary w-100" data-bs-dismiss="modal" aria-label="Close" data-bs-toggle="modal" data-bs-target="#modal-invoice">
+                            View invoice
+                        </button>
+                    </div>
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!--Payment Unsuccessful Modal-->
+    <div class="modal modal-blur fade" id="payment-failed" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <div class="modal-status bg-danger"></div>
+          <div class="modal-body text-center py-4">
+            <!-- Download SVG icon from http://tabler-icons.io/i/alert-triangle -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon mb-2 text-danger icon-lg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 9v2m0 4v.01" /><path d="M5 19h14a2 2 0 0 0 1.84 -2.75l-7.1 -12.25a2 2 0 0 0 -3.5 0l-7.1 12.25a2 2 0 0 0 1.75 2.75" /></svg>
+            <h3>Transaction Failed</h3>
+            <div class="text-muted">Your payment of <span style="font-weight: bold">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-currency-rupee my-auto" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                   <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                   <path d="M18 5h-11h3a4 4 0 0 1 0 8h-3l6 6"></path>
+                   <path d="M7 9l11 0"></path>
+                </svg>
+                <span id="txnfailedValue"></span>
+            </span>
+             <span ="payment-msg">was failed. Please try again!</span> </div>
+          </div>
+          <div class="modal-footer">
+            <div class="w-100">
+              <div class="row">
+                <div class="col"><a href="#" class="btn w-100" data-bs-dismiss="modal">
+                    Cancel
+                  </a>
+                </div>
+                <div class="col">
+                    <button type="button"  class="btn btn-primary w-100" data-bs-dismiss="modal" aria-label="Close" data-bs-toggle="modal" data-bs-target="#modal-invoice">
+                      View invoice
+                    </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!--Txn pending modal-->
+    <div class="modal modal-blur fade" id="payment-pending" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <div class="modal-status bg-warning"></div>
+          <div class="modal-body text-center py-4">
+            <!-- Download SVG icon from http://tabler-icons.io/i/alert-triangle -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon mb-2 text-danger icon-lg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 9v2m0 4v.01" /><path d="M5 19h14a2 2 0 0 0 1.84 -2.75l-7.1 -12.25a2 2 0 0 0 -3.5 0l-7.1 12.25a2 2 0 0 0 1.75 2.75" /></svg>
+            <h3>Transaction Pending</h3>
+            <div class="text-muted">Your payment of <span style="font-weight: bold">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-currency-rupee my-auto" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                   <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                   <path d="M18 5h-11h3a4 4 0 0 1 0 8h-3l6 6"></path>
+                   <path d="M7 9l11 0"></path>
+                </svg>
+                <span id="txnpendingValue"></span>
+            </span>
+             <span ="payment-msg">is pending. Please check later!</span> </div>
+          </div>
+          <div class="modal-footer">
+            <div class="w-100">
+              <div class="row">
+                <div class="col"><a href="#" class="btn w-100" data-bs-dismiss="modal">
+                    Cancel
+                  </a>
+                </div>
+                <div class="col">
+                    <button type="button"  class="btn btn-primary w-100" data-bs-dismiss="modal" aria-label="Close" data-bs-toggle="modal" data-bs-target="#modal-invoice">
+                      View invoice
+                    </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!--TXN receipt modal-->
+    <div id="modal-invoice" class="modal modal-blur fade" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content" >
+            
+          
+          <div class="modal-body px-2" id="receiptprintcontent">
+              <div class="container">
+                  <div class="row py-2">
+                    <div class="col-4">
+                      <!--<img src="https://csp.sec2pay.in//assets/loginassets/img/sec2paylogo.svg" style="width:150px;"/>-->
+                        </div>
+                          <div class="col-8" style="text-align:right">
+                              <p class="h5 mb-0 mt-2">{{isset(Auth::user()->shops->shop_name) ? Auth::user()->shops->shop_name: "NA"}}</p>
+                              <small><span id="retails_name">{{Auth::user()->name}}</span> | <span id="retailer_mbl">{{Auth::user()->mobile}}</span></small><br>
+                              
+                              <small>{{isset(Auth::user()->shops->shop_address) ? Auth::user()->shops->shop_address: "NA"}}</small><br>
+                          </div>      
+                    </div>
+              </div>
+            <div class="hr-text">DMT TRANSACTION</div>
+              <div class="container">
+                  <div class="row">
+                      <div class="col-6">
+                          <p class="h5 mb-0 mt-2">Sender</p>
+                          <small><span id="sender_name_invoice"></span> | <span id="sender_mbl"></span></small><br>
+                          <small>{{isset(Auth::user()->shops->shop_address) ? Auth::user()->shops->shop_address: "NA"}}</small><br>
+                      </div>
+                      <div class="col-6 text-end">
+                          <p class="h5 mb-0 mt-2">Beneficiary</p>
+                          <small><span id="invc_ben_name"></span></small><br>
+                          <small><span id="invc_ben_bank"></span></small><br>
+                          <small><span id="invc_ben_acc"></span> | <span id="invc_ben_ifsc"></span></small><br>
+                      </div>
+                  </div>
+                  
+                  <div class="row mt-3">
+                      <div class="table-responsive">
+                            <table class="table table-vcenter card-table">
+                              <thead>
+                                <tr>
+                                  <th>ORDER #</th>
+                                  <th>TXN ID</th>
+                                  <th>REF NO</th>
+                                  <th>TXN MODE</th>
+                                  <th>STATUS</th>
+                                  <th>AMOUNT</th>
+                                </tr>
+                              </thead>
+                              <tbody id="invoice-table-details">
+                            </tbody>
+                         </table>
+                        </div>
+                  </div>
+                  
+                  <div class="row m-0">
+                        <div class="container d-flex">
+                            <div class="my-3 col-6">
+                                <b>Remark: </b><span id="txn_remark"></span><br>
+                            </div>
+                            <div class="text-end my-3 col-6">
+                                <div class="d-flex" style="float: right"><b>Total Amount: </b><svg xmlns="http://www.w3.org/2000/svg" style="--tblr-icon-size: 1rem;margin-top: 3px;" class="icon icon-tabler icon-tabler-currency-rupee" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                           <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                           <path d="M18 5h-11h3a4 4 0 0 1 0 8h-3l6 6"></path>
+                                           <path d="M7 9l11 0"></path>
+                                        </svg>
+                                        <span id="inv_total_amount"></span></div><br>
+                                <div class="d-flex" style="float: right"><b>Total CCF Charges: </b><svg xmlns="http://www.w3.org/2000/svg" style="--tblr-icon-size: 1rem;margin-top: 3px;" class="icon icon-tabler icon-tabler-currency-rupee" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                           <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                           <path d="M18 5h-11h3a4 4 0 0 1 0 8h-3l6 6"></path>
+                                           <path d="M7 9l11 0"></path>
+                                        </svg>
+                                        <span id="inv_total_charges"></span></div>
+                            </div>
+                        </div>
+                        
+                        <small class="text-muted ml-3 " style="margin-left: 20px; margin-top:10px;">This is a computer generated receipt</small><br>
+                        <small class="text-muted ml-3 " style="margin-left: 20px; margin-top:10px;" id="created_date"></small>
+                    </div>
+              </div>
 
+            
+            
+            
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn me-auto" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="btn-print-invoice">PRINT</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div id="printmaterial"></div>
+    
             <!-- Content here -->
           </div>
         </div>
@@ -1037,7 +1320,7 @@
                         $('#receiver_paymentMode').val($.trim(bene_paymentMode));
                         
                         $("#sen_name").val($.trim(sender_name));
-                        $("#remitterMobile ").val($.trim(sender_mobile));
+                        $("#remitterMobile").val($.trim(sender_mobile));
                         
                         
             
@@ -1067,7 +1350,7 @@
                                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                               },
                       success: function (data) {
-                        if(data.act == "RETRY"){
+                        if(data.act == "CONTINUE"){
                          //alert(mobile);
                             $("#mobilebtn").removeClass('btn-loading');
                             $('#mobilebtn').hide();
@@ -1076,7 +1359,7 @@
                             $('#otpReference').val($.trim(data.data.otpReference));
                             $('#mobileno').val(mobile);
                               webToast.Success({ status: 'Success', message: data.message, delay: 3000, align: 'bottomright' });
-                          }else if(data.act == "CONTINUE"){
+                          }else if(data.act == "RETRY"){
                             
                             $("#mobilebtn").removeClass('btn-loading');
                               webToast.Danger({ status: 'Failed', message: data.message, delay: 3000, align: 'bottomright' });
@@ -1134,7 +1417,7 @@
                         if(data.act == "CONTINUE" && data.apistatus == "TRANSFER_SUCCESSFUL"){
                           $('#btn-sendMoney').removeClass('btn-loading');
                           $('.field-disable').removeAttr('readonly').val('');
-                          $('#verifynamecheck').empty();
+                         // $('#verifynamecheck').empty();
                           $('#offcanvasEnd .closeOffCanvas').click();
                           
                           $.LoadingOverlay("hide");
@@ -1150,7 +1433,7 @@
                             $.LoadingOverlay("hide");
                             
                             $("#txnfailedValue").text(trans_amount); // Set the value in the modal
-                          $("#payment-failed").modal('show');
+                          //$("#payment-failed").modal('show');
                         }else if(data.act == "TERMINATE" && data.apistatus == "TRANSFER_PENDING"){
                             webToast.Info({ status: 'Pending !', message: data.message, delay: 3000, align: 'bottomright'  });
                             $('#btn-sendMoney').removeClass('btn-loading');
@@ -1172,67 +1455,67 @@
                         $("#invoice-table-details").html("");
                         
                         /*Invoice receipt details*/
-                        $.each(data.txnarray, function(index, value) {
+                        //$.each(data.data, function(index, value) {
                             var badgeforstatus;
-                            var badgeforstatus2 = ucfirst(value.status);
+                            var badgeforstatus2 = data.status;
                             
-                            if(value.status == "success"){
+                            if(data.status == "success"){
                                 
                                 badgeforstatus = `<span class="d-flex"><i class="badge bg-success mt-2"></i>&nbsp;`+  badgeforstatus2 +`</span>`;
-                            }else if(value.status == "failed"){
+                            }else if(data.status == "failed"){
                                badgeforstatus = `<span class="d-flex"><i class="badge bg-danger mt-2"></i>&nbsp;`+  badgeforstatus2 +`</span>`;
-                            }else if(value.status == "pending"){
+                            }else if(data.status == "pending"){
                                badgeforstatus = `<span class="d-flex"><i class="badge bg-warning mt-2"></i>&nbsp;`+  badgeforstatus2 +`</span>`;
                             }
                             
                             // return badgeforstatus;
                             
                             $('#gettabledata').append(`<tr>
-                            <td>`+value.orderid+`</td>
-                            <td>`+value.txnid+`</td>
-                            <td>`+value.tid+`</td>
+                            <td>`+data.data.externalRef+`</td>
+                            <td>`+data.data.txnReferenceId+`</td>
+                            <td>`+data.data.poolReferenceId+`</td>
                             <td><svg style="--tblr-icon-size: 1rem; margin: 2px" xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-currency-rupee" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                                    <path d="M18 5h-11h3a4 4 0 0 1 0 8h-3l6 6"></path>
                                    <path d="M7 9l11 0"></path>
                                 </svg>
-                                `+value.amount+`
+                                `+data.data.txnValue+`
                             </td>
                             <td>`+badgeforstatus+`</td></tr>`);
                             
                             $('#invoice-table-details').append(`<tr>
-                            <td>`+value.orderid+`</td>
-                            <td>`+value.txnid+`</td>
-                            <td>`+value.refno+`</td>
-                            <td>`+value.txnmode.toUpperCase()+`</td>
+                            <td>`+data.data.externalRef+`</td>
+                            <td>`+data.data.txnReferenceId+`</td>
+                            <td>`+data.data.poolReferenceId+`</td>
+                            <td>`+data.data.paymentMode.toUpperCase()+`</td>
                             <td>`+badgeforstatus+`</td>
                             <td><div class="d-flex"><svg xmlns="http://www.w3.org/2000/svg" style="--tblr-icon-size: 1rem;margin-top: 3px;" class="icon icon-tabler icon-tabler-currency-rupee" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                                    <path d="M18 5h-11h3a4 4 0 0 1 0 8h-3l6 6"></path>
                                    <path d="M7 9l11 0"></path>
                                 </svg>
-                                `+value.amount+`</div>
+                                `+data.data.txnValue+`</div>
                             </td></tr>`);
                             
                             //sender details
-                            $("#sender_name_invoice").text(value.sendername);
-                            $("#sender_mbl").text(value.sendermbl);
+                            $("#sender_name_invoice").text(data.data.remitterName);
+                            $("#sender_mbl").text(data.data.remitterMobile);
                             
                             //beneficiary details
-                            $("#invc_ben_name").text(value.beneficiary_name);
-                            $("#invc_ben_bank").text(value.bankname);
-                            $("#invc_ben_acc").text(value.beneficiary_account);
-                            $("#invc_ben_ifsc").text(value.beneficiary_ifsc);
+                            $("#invc_ben_name").text(data.data.beneficiaryName);
+                            $("#invc_ben_bank").text(data.data.beneficiaryBankName);
+                            $("#invc_ben_acc").text(data.data.beneficiaryAccount);
+                            $("#invc_ben_ifsc").text(data.data.beneficiaryBranchId);
                             
-                            var totalamount = parseInt(value.totalamount, 10); 
-                            var totalcharges = parseInt(value.totalcharges, 10);
-                                var txnamount = parseFloat(totalamount);
+                            var totalamount = parseInt(data.data.pool.openingBal, 10); 
+                            var totalcharges = parseInt(data.data.exchangeRate, 10);
+                                var txnamount = parseFloat(data.data.pool.openingBal);
                             
                             $("#inv_total_amount").text(txnamount);
-                            $("#inv_total_charges").text(value.totalcharges);
-                            $("#txn_remark").text(value.txnremark);
+                            $("#inv_total_charges").text(data.data.totalcharges);
+                            $("#txn_remark").text(data.data.txnremark);
                             
-                        });
+                       // });
                         $("#created_date").text(data.date);
                         /*Invoice receipt details*/
                     })

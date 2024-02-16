@@ -249,7 +249,7 @@ class DMTV5Controller extends Controller
         $data["accountNumber"]=$request->accountNumber;/*Optional(Mandatory when paymentMode is Account Deposit)*/
         $data["beneficiaryId"]=$request->beneficiaryId;/*Optional(Mandatory if operation is FundTransfer*/
         $data["transferAmount"]=$request->transferAmount;
-        $mockmode = false;
+        $mockmode = true;
         $mockmodestatus="SUCCESS";//FAILED,PENDING
         $result = \DmtApiv5::sendOtp($data, $mockmode,$mockmodestatus);
         if($result['apistatus'] == 'OTP_SEND'){
@@ -665,8 +665,14 @@ class DMTV5Controller extends Controller
     {
         $data['api']="instantpayfundTransfer";
         $data["via"]="web";
-        //$externalRef=rand(11111, 99999);
-        $data["externalRef"]="099968327623459089008776866";
+        $minFloat=11111111111111111111111111;
+        $maxFloat=99999999999999999999999999;
+        $min = (int)$minFloat;
+        $max = (int)$maxFloat;
+        $externalRef = mt_rand($min, $max);
+        $data["externalRef"] = "$externalRef";
+       
+       // $data["externalRef"]=$externalRef;
         $data["remitterMobile"]=$request->remitterMobile;
         $data["beneficiaryId"]=$request->beneficiaryId;
         $data["transferAmount"]=$request->transferAmount;
@@ -677,7 +683,7 @@ class DMTV5Controller extends Controller
         $data["longitude"]="20.0000";
         //$data["latitude"]=$request->latitude;
         //$data["longitude"]=$request->longitude;
-        $mockmode = false;
+        $mockmode = true;
         $mockmodestatus="SUCCESS";//FAILED,PENDING
         $result = \DmtApiv5::fundTransfer($data, $mockmode,$mockmodestatus);
         

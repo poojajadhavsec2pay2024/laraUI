@@ -1350,7 +1350,7 @@ class DMTV5Helper {
         if(!$mockMode){
                     
             $result = \PortalAPIHub::curl($product, $url, "POST", $parameters, $instantpayData["header"], "YES", "DMTV5Helper", $txnID);
-           // dd($result);
+          // dd($result);
 
             if($result["code"]!=200){
                 $resMessage=json_decode($result['response']);
@@ -1382,7 +1382,7 @@ class DMTV5Helper {
         if($jsonD->statuscode=="TXN") //1== Transaction Successful //code added by pooja jadhav
         {
            $output['status'] = "success";
-           $output['apistatus']='TRANSFER_SUCCESS';
+           $output['apistatus']='TRANSFER_SUCCESSFUL';
            $output['message'] = "Transaction Successful";
            $output['apiremark']=isset($jsonD->status) ? $jsonD->status : "NA";
            $output['data'] = $jsonD->data;
@@ -1390,7 +1390,7 @@ class DMTV5Helper {
         else if ($jsonD->statuscode=='TUP')   
         { 
             $output['status'] = "pending";
-            $output['apistatus']='TRANSFER_UNDER_PROCESS';
+            $output['apistatus']='TRANSFER_PENDING';
             $output['message']= "Transaction Under Progress";
             $output['apiremark']= isset($jsonD->status) ? $jsonD->status : "NA";
             $output['data'] =isset($jsonD->data) ? $jsonD->data : [];
