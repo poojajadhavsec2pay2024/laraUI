@@ -645,6 +645,7 @@ class DMTV5Helper {
             $para["mobile"]=$data['mobile'];
             if($data['operation']!='REMITTER_REGISTRATION')
             {
+            $para["operation"]='FundTransfer';
            $para["paymentMode"]=$data['paymentMode'];
            $para["bankBranchId"]=$data['bankBranchId'];
            $para["accountNumber"]=$data['accountNumber'];
@@ -1172,11 +1173,12 @@ class DMTV5Helper {
             $para["paymentMode"]=$data["paymentMode"];
         if($para["paymentMode"]!='Cash Payment')  //CASH_PAYMENT
         {
-            $para["bankBranchId"]=$data["bankBranchId"];
+            
             $para["accountNumber"]=$data["accountNumber"];
         }else{
             $para["paymentMode"]='Cash Payment';
         }
+        $para["bankBranchId"]=$data["bankBranchId"];
         $parameters=json_encode($para);
           // dd($parameters);
         if(!$mockMode){
@@ -1484,7 +1486,7 @@ class DMTV5Helper {
         else if (in_array($jsonD->statuscode, ['IVC','ERR','RPI','ISE']))   
         { 
             $output['status'] = "success";
-            $output['apistatus']='TRANSACTION_FAILED';
+            $output['apistatus']='TTRANSFER_FAILED';
             $output['message']= "Transaction Status Failed to Fetch";
             $output['apiremark']= isset($jsonD->status) ? $jsonD->status : "NA";
             $output['data'] =isset($jsonD->data) ? $jsonD->data : [];

@@ -225,15 +225,21 @@ class DMTV5Controller extends Controller
     }
     public function sendOtp(Request $request)
     {
-        $request->validate([
-            'operation' => 'required',
-            'mobile' => 'required',
-            'paymentMode' => 'required',
-            'bankBranchId' => 'required',
-            'accountNumber' => 'required',
-            'beneficiaryId' => 'required',
-            'transferAmount' => 'required' 
-        ]);
+            if($request->operation=='FUND_TRANSFER')
+            {
+            $request->validate([
+                'operation' => 'required',
+                'mobile' => 'required',
+                'paymentMode' => 'required',
+                'beneficiaryId' => 'required',
+                'transferAmount' => 'required' 
+            ]);
+        }else{
+            $request->validate([
+                'operation' => 'required',
+                'mobile' => 'required',
+            ]);
+        }
         $data['api']="instantpaysendOtp";
         $data["via"]="web";
         $data["operation"]=$request->operation;/*FundTransfer,RemitterRegistration*/
@@ -243,7 +249,7 @@ class DMTV5Controller extends Controller
         $data["accountNumber"]=$request->accountNumber;/*Optional(Mandatory when paymentMode is Account Deposit)*/
         $data["beneficiaryId"]=$request->beneficiaryId;/*Optional(Mandatory if operation is FundTransfer*/
         $data["transferAmount"]=$request->transferAmount;
-        $mockmode = true;
+        $mockmode = false;
         $mockmodestatus="SUCCESS";//FAILED,PENDING
         $result = \DmtApiv5::sendOtp($data, $mockmode,$mockmodestatus);
         if($result['apistatus'] == 'OTP_SEND'){
@@ -659,19 +665,58 @@ class DMTV5Controller extends Controller
     {
         $data['api']="instantpayfundTransfer";
         $data["via"]="web";
-        $data["externalRef"]=$request->externalRef;
+        //$externalRef=rand(11111, 99999);
+        $data["externalRef"]="099968327623459089008776866";
         $data["remitterMobile"]=$request->remitterMobile;
         $data["beneficiaryId"]=$request->beneficiaryId;
         $data["transferAmount"]=$request->transferAmount;
         $data["remittanceReason"]=$request->remittanceReason;
         $data["otpReference"]=$request->otpReference;
         $data["otp"]=$request->otp;
-        $data["latitude"]=$request->latitude;
-        $data["longitude"]=$request->longitude;
+        $data["latitude"]="10.0000";
+        $data["longitude"]="20.0000";
+        //$data["latitude"]=$request->latitude;
+        //$data["longitude"]=$request->longitude;
         $mockmode = false;
         $mockmodestatus="SUCCESS";//FAILED,PENDING
         $result = \DmtApiv5::fundTransfer($data, $mockmode,$mockmodestatus);
-        dd($result);
+        
+        if($result['apistatus'] == 'TRANSFER_SUCCESSFUL'){ 
+            $output['status'] = $result['status'];
+            $output['act'] = "CONTINUE";
+            $output['apistatus']=$result['apistatus'];
+            $output['apiremark']=$result['apiremark'];
+            $output['message'] = $result['message'];
+            $output['data']= $result['data'];
+            
+        }
+        else if($result['apistatus'] == 'TRANSFER_PENDING'){
+            
+            $output['status'] = $result['status'];
+            $output['act'] = "TERMINATE";
+            $output['apistatus']=$result['apistatus'];
+            $output['apiremark']=$result['apiremark'];
+            $output['message'] = $result['message'];
+            $output['data']= $result['data'];
+        }
+        else if($result['apistatus'] == 'TRANSFER_FAILED'){
+            
+            $output['status'] = $result['status'];
+            $output['act'] = "RETRY";
+            $output['apistatus']=$result['apistatus'];
+            $output['apiremark']=$result['apiremark'];
+            $output['message'] = $result['message'];
+            $output['data']= $result['data'];
+        }
+        else {
+            $output['status'] = "failed";
+            $output['act'] = "TERMINATE";
+            $output['apistatus']='API_CALLFAILED';
+            $output['message']= "Unknown resposne received. Please try again";
+            return response()->json($output,400);
+        }
+        return response()->json($output,200);
+    
     
     }
     public function fetchTransactionStatus(Request $request)

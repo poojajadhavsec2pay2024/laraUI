@@ -4,7 +4,9 @@
 <link href="{{url('frontend/dist/css/webToast.min.css')}}" rel="stylesheet"/>
 <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet"> 
 <link href="{{url('frontend/dist/css/validetta.min.css')}}" rel="stylesheet" />
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
 
 <script src="{{url('frontend/dist/js/validetta.min.js')}}"></script>
 <script type="text/javascript" src="{{url('frontend/dist/js/webToast.min.js')}}"></script>
@@ -210,7 +212,7 @@
                             <th>Payment Mode</th> 
                             <th>Bank</th>
                             <th>Account</th>
-                            <th>IFSC</th>
+                            <th>Bank Branch ID</th>
                             <th>Action</th>
                             <th style="display:none">Beneficiary Id</th>
                           </tr>
@@ -353,13 +355,13 @@
                        <div class="row mt-3"  id="accountnodiv" style="display:none">
                             <div class="form-group col-12">
                                 <label class="form-label required text-muted">Account No.</label>
-                                <input id="accountno" type="text"  name="accountno" autocomplete="off" data-validetta="required,minLength[6],maxLength[20],number" class="form-control field-disable" onkeypress="return accountnumber(event,this.id)" data-vd-message-required="Please enter account number" data-vd-message-minLength="Please enter valid account number" data-vd-message-number="Please enter valid account number">
+                                <input id="accountno" type="text"  name="accountno" autocomplete="off" data-validetta="minLength[6],maxLength[20],number" class="form-control field-disable" onkeypress="return accountnumber(event,this.id)" data-vd-message-required="Please enter account number" data-vd-message-minLength="Please enter valid account number" data-vd-message-number="Please enter valid account number">
                             </div>
                        </div>
                        <div class="row mt-3" id="conf_accountnodiv" style="display:none">
                             <label class="form-label required text-muted">Confirm Acc No.</label>
                               <div class="input-group col-12">
-                                <input id="conf_accountno" type="text"  name="conf_accountno" autocomplete="off" style="width: auto;" data-validetta="required,minLength[6],maxLength[20],number,equalTo[accountno]" class="form-control field-disable" onkeypress="return accountnumber(event,this.id)" data-vd-message-required="Please confirm account number" data-vd-message-minLength="Please enter valid account number" data-vd-message-number="Please enter valid account number" data-vd-message-equalTo="Confirm account do not match with account no.">
+                                <input id="conf_accountno" type="text"  name="conf_accountno" autocomplete="off" style="width: auto;" data-validetta="minLength[6],maxLength[20],number,equalTo[accountno]" class="form-control field-disable" onkeypress="return accountnumber(event,this.id)" data-vd-message-required="Please confirm account number" data-vd-message-minLength="Please enter valid account number" data-vd-message-number="Please enter valid account number" data-vd-message-equalTo="Confirm account do not match with account no.">
                                
                                
                               </div>
@@ -438,30 +440,45 @@
                             </div>
                             
                             <h3 id="ben_name"  style="margin: 0">
-                                ben name
+                               Beneficiary Name
                             </h3>
-                            <p id="ben_bank" style="text-align: left; margin: 0;">
-                                BANK NAME
+                            <p id="ben_mobile" style="text-align: left; margin: 0;">
+                                Beneficiary Mobile
                             </p>
                             <div class="d-flex">
-                                <code style="font-size: 12px;" id="benaccount">Ben Account</code>&nbsp;<code style="font-size: 12px;" id="benifsc">Ben IFSC</code>
+                                <code style="font-size: 18px;" id="benaccount">Ben Account</code>&nbsp;<code style="font-size: 18px;" id="bene_paymentMode">Ben IFSC</code>
                             </div>
                         </div>
                             
                         <div class="hr-text">
                             Transaction Details
                         </div>
-                        <form id="send-money" method="post" action="#">   
+                        <form id="send-money" method="post" action="{{ route('fundTransfer')}}">   
                             @csrf
-
+                            <input type="hidden" class="form-control" id="operation" name="operation" value="FUND_TRANSFER">
                             <input type="hidden" id="rec_name"  name="b_name" value="">
-                            <input type="hidden" id="rec_bank" name="b_bank" value="">
-                            <input type="hidden" id="rec_account" name="b_account" value="">
-                            <input type="hidden" id="rec_ifsc_number" name="b_ifsc_number" value="">
-                            <input type="hidden" id="sen_name" name="sen_name" value="">
-                            <input type="hidden" id="sen_mbl" name="sen_mbl" value="">
-                            <input type="hidden" id="ben_id" name="ben_id" value="">
+                            <input type="hidden" id="rec_bankBranchId" name="rec_bankBranchId" value="">
+                            <input type="hidden" id="rec_account" name="rec_account" value="">
+                            <input type="hidden" id="receiver_mobile" name="receiver_mobile" value="">
+                            <input type="hidden" id="receiver_paymentMode" name="receiver_paymentMode" value="">
+                            <input type="hidden" id="sen_name" name="sen_name1" value="">
+                            <input type="hidden" id="remitterMobile " name="remitterMobile " value="">
+                            <input type="hidden" id="beneficiaryId" name="beneficiaryId" value="">
                             <div class="row">
+                            <div>
+                               <div class="form-group col-12 mb-3 row">
+                               <label class="form-label required text-muted">Relationship</label>
+                                  <select type="text"  name="remittanceReason" id="remittanceReason" class="form-select field-disable" data-validetta="required" data-vd-message-required="Please select remittanceReason">
+                                  <option value="">Select Remittance Reason</option>
+                                  <option value="Educational Expenses">Educational Expenses</option>
+                                  <option value="EMI Payments">EMI Payments</option>
+                                  <option value="Family Maintenance">Family Maintenance</option>
+                                  <option value="Medical Expenses">Medical Expenses</option>
+                                  <option value="Repayment of Loans">Repayment of Loans</option>
+                                  <option value="Saving Purpose">Saving Purpose</option>
+                                  <option value="Utility Payment">Utility Payment</option>
+                                  </select>                            
+                                </div>
                                 <label class="form-label required text-muted">Enter Amount to transfer</label>
                                 <div class="input-group mb-2">
                                     <span class="input-group-text">
@@ -472,20 +489,20 @@
                                        <path d="M9 11h6"></path>
                                     </svg>                               
                                     </span>
-                                    <input id="tr_amount" type="text"  name="tr_amount" autocomplete="off" placeholder="Amount" data-validetta="required" onkeypress="return addAmount(event,this.id)" class="form-control field-disable" data-vd-message-required="Please enter amount">
+                                    <input id="transferAmount" type="text"  name="transferAmount" autocomplete="off" placeholder="Amount" data-validetta="required" onkeypress="return addAmount(event,this.id)" class="form-control field-disable" data-vd-message-required="Please enter amount">
                                </div>
+                            </div class="text-end">
+                            <button class="btn btn-primary" type="button" id="mobilebtn" name="mobilebtn">Get OTP</button>
                             </div>
-                            
-                            <div>
-                               <div class="form-group col-12 mb-3 row">
-                                   <label class="form-label required text-muted">Payment Mode</label>
-                                   <label class="form-label col-lg-3 col-md-3 col-sm-6"><input type="radio" name="tr_mode" value="2" data-validetta="required" data-vd-message-required="Payment Mode Required" checked> IMPS</label>
-                                   <label class="form-label col-lg-3 col-md-3 col-sm-6"><input type="radio" name="tr_mode" value="1" data-validetta="required" data-vd-message-required="Payment Mode Required"> NEFT</label>
-                               </div>
-                            </div>
-                        
-                            <div class="text-end">
-                              <button id="btn-sendMoney" type="submit" class="btn btn-primary">Submit</button>
+                            <div class="row" id="submitotpblock_fundtransfer" style="display:none">
+                                <div class="form-group col-6 mb-3">
+                                    <label class="form-label required text-muted">Enter OTP</label>
+                                    <input type="text" class="form-control field-disable"  id="otp" name="otp" data-validetta="required" class="form-control field-disable" data-vd-message-required="Please enter OTP">   
+                                    <input type="hidden" class="form-control" id="otpReference" name="otpReference" >
+                                </div>
+                                <div class="text-end">
+                                <button id="btn-sendMoney" type="submit" class="btn btn-primary" style="display:none">Submit</button>
+                                </div>
                             </div>
                         </form>
                 
@@ -553,6 +570,13 @@
                                 $("#table_body").html("");
                                 var srno = 1;
                                 $.each(data.data.beneficiaries, function(index, value) {
+                                    if(value.bankBranchId)
+                                    {
+                                        var branchId=value.bankBranchId;
+                                    }
+                                    else{
+                                        var branchId='';
+                                    }
                                     $('#table_body').append(`<tr>
                                     <td>`+srno+`</td>
                                     <td>`+value.name+`</td>
@@ -566,7 +590,7 @@
                                     <td>`+value.bankBranchId+`</td> 
                                     <td style="display:none">`+value.id+`</td>
                                     <td>
-                                        <a id="btn-getSendDetails" onclick="btnSendmoney()" class='btn btn-outline-info rounded-pill' data-bs-toggle='offcanvas' href='#offcanvasEnd' role='button' aria-controls='offcanvasEnd'>
+                                        <a id="btn-getSendDetails" onclick="btnSendmoney('`+data.data.firstName+`','`+data.data.mobile+`','`+value.id+`','`+ value.name +`','`+value.mobile+`','`+value.acNumber+`','`+value.paymentMode+`','`+branchId+`')" class='btn btn-outline-info rounded-pill' data-bs-toggle='offcanvas' href='#offcanvasEnd' role='button' aria-controls='offcanvasEnd'>
                                             <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-send" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                                                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                                                <path d="M10 14l11 -11"></path>
@@ -596,16 +620,7 @@
                             
                           }else if(data.apistatus == "NOT_REGISTERED"){
                             var mobileno = $("#mobile").val();
-                           // $('#sender_details').hide();
-                              // $('#beneficiary_details').hide();
-                              // $('#sendMoney').hide();
-                               //$('#offcanvasEndLabel').text("Member Registration");
-                              // $('.field-disable').removeAttr('readonly').val('');
                               $('#btn-getDetails').removeClass('btn-loading');
-                              // $('#cus_mobile').val(value).prop('readonly', true).css('background','#eaeaea');
-                            // if($('body').hasClass('theme-dark')){
-                            //       $('#cus_mobile').css('background','#716D6D');
-                            // }
                                 webToast.Info({ status: 'Failed !', message: data.message, delay: 3000, align: 'bottomright'  });
                                 var form = $('<form>', {
                                     'method': 'POST',
@@ -734,19 +749,29 @@
             var bankBranchId = $("#bankBranchId").val();
             var accountno = $("#accountno").val();
             var conf_accountno = $("#conf_accountno").val();
+           
             
             var mbl_len = ben_mobile.length;
             var c_acc_len = conf_accountno.length;
             var acc_len = accountno.length;
-
-            if (mbl_len > 9 && bankBranchId !== "" && paymentMode !== "" && district !== "" && state !== "" && relationship !== "" && gender !== "" && ben_mobile !== "" && ben_name !== "" && accountno === conf_accountno && acc_len > 3 && c_acc_len > 3) {
-                $("#btn-getBenOtp").removeAttr('disabled');
-            } else {
-                $("#btn-getBenOtp").prop('disabled', true);
+            if(accountno)
+            {
+                if (mbl_len > 9 && conf_accountno !== "" && accountno !== "" && bankBranchId !== "" && paymentMode !== "" && district !== "" && state !== "" && relationship !== "" && gender !== "" && ben_mobile !== "" && ben_name !== "" && accountno === conf_accountno && acc_len > 3 && c_acc_len > 3) {
+                        $("#btn-getBenOtp").removeAttr('disabled');
+                    } else {
+                        $("#btn-getBenOtp").prop('disabled', true);
+                    }
+            }
+            else{
+                    if (mbl_len > 9 && bankBranchId !== "" && paymentMode !== "" && district !== "" && state !== "" && relationship !== "" && gender !== "" && ben_mobile !== "" && ben_name !== "") {
+                        $("#btn-getBenOtp").removeAttr('disabled');
+                    } else {
+                        $("#btn-getBenOtp").prop('disabled', true);
+                    }
             }
         }
 
-        $("#b_name, #b_mobile, #bankBranchId, #paymentMode,#district,#state,#relationship,#gender").on('input', handleInput);
+        $("#b_name, #b_mobile,#conf_accountno, #accountno, #bankBranchId, #paymentMode,#district,#state,#relationship,#gender").on('input', handleInput);
 
         //state,District,payment mode select option change
         function fetchPaymentLocationList() {
@@ -979,44 +1004,258 @@
             function dmtsearch(){
             $("#dmtmobile").submit();
         }
-        function btnSendmoney(){
-                   // alert('kkkk');
+        function btnSendmoney(sendname,sendmobile,bene_id,bene_name,bene_mobile,bene_account,bene_paymentMode,bankBranchId)
+            {
+             alert(sendname+sendmobile+bene_id+bene_name+bene_mobile+bene_account+bene_paymentMode+bankBranchId);
                     var mobileno = $('#mobile').val();
-                    
-                    $("#offcanvasEndLabel").text("Send Money");
-                    $("#beneficiaryReg").hide();
-                    
-                    $("#sendMoney").show();
-                    
-                    $(".hiddemobile").val(mobileno);
-         }
-        //send money button click 
-        $('#btn-sendMoney').click(function(){
-               var receivers_name = document.getElementById('rec_name').value;
-               var receivers_bank = document.getElementById('rec_bank').value;
-               var receivers_account = document.getElementById('rec_account').value;
-               var receivers_ifsc = document.getElementById('rec_ifsc_number').value;
-               var senders_name = document.getElementById('sen_name').value;
-               var senders_mbl = document.getElementById('sen_mbl').value;
-               
-               var amount_transfer = parseFloat(document.getElementById('tr_amount').value);
-               amount_transfer = amount_transfer.toFixed(2);
-               
-               var pay_mode = $('input[name="tr_mode"]:checked').val();
-               
-               $("#recei_nam").text(receivers_name);
-               $("#recei_mobile").text(receivers_name);
-               $("#transfer_amount").text(amount_transfer);
-               $("#recei_bank").text(receivers_bank);
-               $("#recei_account").text(receivers_account);
-               $("#recei_ifsc").text(receivers_ifsc);
-               $("#recei_paymode").text(pay_mode.toUpperCase());
-               
-               // Adjust width for validetta error span which is not getting adjusted
-                $(".validetta-inline").empty();
+                            
+                            $("#offcanvasEndLabel").text("Send Money");
+                            $("#beneficiaryReg").hide();
+                            
+                            $("#sendMoney").show();
+                            
+                            $(".hiddemobile").val(mobileno);
+                            
+                        var sender_name = $('#user_name').text();
+                        var sender_mobile =  $('#sendermobile').text();
 
-            });
+                        $("#sender_name").text(sender_name);
+                        $("#sender_mobile").text(sender_mobile);
+                       
+                        $('#ben_name').text($.trim(bene_name));
+                        $('#ben_mobile').text($.trim(bene_mobile));
+                        
+                        $('#benaccount').text($.trim(bene_account));
+                        $('#bene_paymentMode').text($.trim(bene_paymentMode));
+                        
+                        $('#beneficiaryId').val($.trim(bene_id));
+                        $('#rec_name').val($.trim(bene_name));
+                        $('#receiver_mobile').val($.trim(bene_mobile));
+                        $('#rec_bankBranchId').val(bankBranchId);
+                        
+                        $('#rec_account').val($.trim(bene_account));
+                        $('#receiver_paymentMode').val($.trim(bene_paymentMode));
+                        
+                        $("#sen_name").val($.trim(sender_name));
+                        $("#remitterMobile ").val($.trim(sender_mobile));
+                        
+                        
+            
+            }
+            $("#mobilebtn").click(function(){
+                var mobile = $('#mobile').val();
+                var operation = $('#operation').val();
+                var beneficiaryId = $('#beneficiaryId').val();
+                var receiver_paymentMode = $('#receiver_paymentMode').val();
+                var rec_bankBranchId = $('#rec_bankBranchId').val();
+                var rec_account = $('#rec_account').val();
+                var transferAmount = $('#transferAmount').val();
+                  $("#mobilebtn").addClass('btn-loading');
+                    $.ajax({
+                      type: 'POST', // The HTTP method to use
+                      url: '{{ route('sendOtp') }}', // The URL of the controller action to call
+                      data: {
+                          mobile:mobile,
+                          operation:operation,
+                          paymentMode:receiver_paymentMode,
+                          bankBranchId:rec_bankBranchId,
+                          accountNumber:rec_account,
+                          beneficiaryId:beneficiaryId,
+                          transferAmount:transferAmount
+                      },
+                      headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                              },
+                      success: function (data) {
+                        if(data.act == "RETRY"){
+                         //alert(mobile);
+                            $("#mobilebtn").removeClass('btn-loading');
+                            $('#mobilebtn').hide();
+                            $('#submitotpblock_fundtransfer').show();
+                            $('#btn-sendMoney').show();
+                            $('#otpReference').val($.trim(data.data.otpReference));
+                            $('#mobileno').val(mobile);
+                              webToast.Success({ status: 'Success', message: data.message, delay: 3000, align: 'bottomright' });
+                          }else if(data.act == "CONTINUE"){
+                            
+                            $("#mobilebtn").removeClass('btn-loading');
+                              webToast.Danger({ status: 'Failed', message: data.message, delay: 3000, align: 'bottomright' });
+                          }else{
+                              webToast.Danger({ status: 'Failed', message: data.message, delay: 3000, align: 'bottomright' });
+                          }
+                      },
+                      error: function (jqXHR, textStatus, errorThrown) {
+                          if(jqXHR.responseJSON.message != undefined && jqXHR.status ==400) {
+                            var msg=jqXHR.responseJSON.message;
+                        }else{
+                            var msg="Something went wrong ("+ jqXHR.status +")";
+                        }
+                        webToast.Danger({ status: 'Failed', message: msg, delay: 3000, align: 'bottomright' });
+                        $("#mobilebtn").removeClass('btn-loading');
+                      }
+                    });
+          });
+
+       
             //datatable send money  button click
-          
+            $('#send-money').validetta({
+              realTime: true,
+              display: 'inline',
+              errorTemplateClass: 'validetta-inline w-100',
+              onValid: function (event) {
+                     $('#btn-sendMoney').addClass('btn-loading');
+                     if($('body').hasClass('theme-dark')){
+                         $.LoadingOverlaySetup({
+                            background      : "rgba(0, 0, 0, 0.5)",
+                            size : "50px",
+                            imageColor      : "#ffcc00"
+                        });
+                     }else{
+                         $.LoadingOverlaySetup({
+                            background      : "rgba(0, 0, 0, 0.5)",
+                            size : "50px",
+                            imageColor      : "#000"
+                        });
+                     }
+                     // Show full page LoadingOverlay
+                    $.LoadingOverlay("show");
+
+                    $('.field-disable').prop('readonly', true);
+                    var trans_amount = $("#transferAmount").val(); // Get the value from the input field
+                    event.preventDefault();
+                    $.ajax({
+                      url: '{{ route('fundTransfer') }}',
+                      data: $("#send-money").serialize(),
+                      dataType: 'json',
+                      method: 'post'
+                    })
+                    
+                    .done(function (data) {
+                        if(data.act == "CONTINUE" && data.apistatus == "TRANSFER_SUCCESSFUL"){
+                          $('#btn-sendMoney').removeClass('btn-loading');
+                          $('.field-disable').removeAttr('readonly').val('');
+                          $('#verifynamecheck').empty();
+                          $('#offcanvasEnd .closeOffCanvas').click();
+                          
+                          $.LoadingOverlay("hide");
+
+                            $("#modalValue").text(trans_amount); // Set the value in the modal
+                          $("#payment-success").modal('show');
+                        }else if(data.act == "RETRY" && data.apistatus == "TRANSFER_FAILED"){
+                            webToast.Danger({ status: 'Failed !', message: data.message, delay: 3000, align: 'bottomright'  });
+                            $('#btn-sendMoney').removeClass('btn-loading');
+                            $("#payment-failed").modal('show');
+                            $('#offcanvasEnd .closeOffCanvas').click();
+                            
+                            $.LoadingOverlay("hide");
+                            
+                            $("#txnfailedValue").text(trans_amount); // Set the value in the modal
+                          $("#payment-failed").modal('show');
+                        }else if(data.act == "TERMINATE" && data.apistatus == "TRANSFER_PENDING"){
+                            webToast.Info({ status: 'Pending !', message: data.message, delay: 3000, align: 'bottomright'  });
+                            $('#btn-sendMoney').removeClass('btn-loading');
+                            $('.field-disable').removeAttr('readonly').val('');
+                            $('#offcanvasEnd .closeOffCanvas').click();
+                            
+                            
+                            $.LoadingOverlay("hide");
+                            $("#txnpendingValue").text(trans_amount); // Set the value in the modal
+                            $("#payment-pending").modal('show');
+                        }else {
+                            webToast.Danger({ status: 'Pending !', message: data.message, delay: 3000, align: 'bottomright'  });
+                            $('#btn-sendMoney').removeClass('btn-loading');
+                            $('.field-disable').removeAttr('readonly').val('');
+                            $('#offcanvasEnd .closeOffCanvas').click();
+                        }
+                        
+                        $("#gettabledata").html("");
+                        $("#invoice-table-details").html("");
+                        
+                        /*Invoice receipt details*/
+                        $.each(data.txnarray, function(index, value) {
+                            var badgeforstatus;
+                            var badgeforstatus2 = ucfirst(value.status);
+                            
+                            if(value.status == "success"){
+                                
+                                badgeforstatus = `<span class="d-flex"><i class="badge bg-success mt-2"></i>&nbsp;`+  badgeforstatus2 +`</span>`;
+                            }else if(value.status == "failed"){
+                               badgeforstatus = `<span class="d-flex"><i class="badge bg-danger mt-2"></i>&nbsp;`+  badgeforstatus2 +`</span>`;
+                            }else if(value.status == "pending"){
+                               badgeforstatus = `<span class="d-flex"><i class="badge bg-warning mt-2"></i>&nbsp;`+  badgeforstatus2 +`</span>`;
+                            }
+                            
+                            // return badgeforstatus;
+                            
+                            $('#gettabledata').append(`<tr>
+                            <td>`+value.orderid+`</td>
+                            <td>`+value.txnid+`</td>
+                            <td>`+value.tid+`</td>
+                            <td><svg style="--tblr-icon-size: 1rem; margin: 2px" xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-currency-rupee" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                   <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                   <path d="M18 5h-11h3a4 4 0 0 1 0 8h-3l6 6"></path>
+                                   <path d="M7 9l11 0"></path>
+                                </svg>
+                                `+value.amount+`
+                            </td>
+                            <td>`+badgeforstatus+`</td></tr>`);
+                            
+                            $('#invoice-table-details').append(`<tr>
+                            <td>`+value.orderid+`</td>
+                            <td>`+value.txnid+`</td>
+                            <td>`+value.refno+`</td>
+                            <td>`+value.txnmode.toUpperCase()+`</td>
+                            <td>`+badgeforstatus+`</td>
+                            <td><div class="d-flex"><svg xmlns="http://www.w3.org/2000/svg" style="--tblr-icon-size: 1rem;margin-top: 3px;" class="icon icon-tabler icon-tabler-currency-rupee" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                   <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                   <path d="M18 5h-11h3a4 4 0 0 1 0 8h-3l6 6"></path>
+                                   <path d="M7 9l11 0"></path>
+                                </svg>
+                                `+value.amount+`</div>
+                            </td></tr>`);
+                            
+                            //sender details
+                            $("#sender_name_invoice").text(value.sendername);
+                            $("#sender_mbl").text(value.sendermbl);
+                            
+                            //beneficiary details
+                            $("#invc_ben_name").text(value.beneficiary_name);
+                            $("#invc_ben_bank").text(value.bankname);
+                            $("#invc_ben_acc").text(value.beneficiary_account);
+                            $("#invc_ben_ifsc").text(value.beneficiary_ifsc);
+                            
+                            var totalamount = parseInt(value.totalamount, 10); 
+                            var totalcharges = parseInt(value.totalcharges, 10);
+                                var txnamount = parseFloat(totalamount);
+                            
+                            $("#inv_total_amount").text(txnamount);
+                            $("#inv_total_charges").text(value.totalcharges);
+                            $("#txn_remark").text(value.txnremark);
+                            
+                        });
+                        $("#created_date").text(data.date);
+                        /*Invoice receipt details*/
+                    })
+                    .fail(function (jqXHR, textStatus) {
+                        if(jqXHR.responseJSON.message != undefined && jqXHR.status ==400) {
+                            var msg=jqXHR.responseJSON.message;
+                        }else{
+                            var msg="Something went wrong ("+ jqXHR.status +")";
+                        }
+                        webToast.Danger({ status: 'Failed', message: msg, delay: 3000, align: 'bottomright' });
+                        $('#btn-sendMoney').removeClass('btn-loading');
+                        $('.field-disable').removeAttr('readonly');
+                        // $("#payment-failed").modal('show');
+                        
+                        $.LoadingOverlay("hide");
+                    })
+                    .always(function (result) {
+                      $('#btn-sendMoney').removeClass('btn-loading');
+                      $('.field-disable').removeAttr('readonly');
+                      
+                      $.LoadingOverlay("hide");
+                    });
+              }
+            });
         </script>
 @endsection
