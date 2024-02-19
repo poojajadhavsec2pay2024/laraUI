@@ -283,7 +283,7 @@
                 <div class="card-body">
                        <form id="icaepskyc" method="post" action="">
                     @csrf
-                    <p class="empty-title">Do 2FA here...</p>
+                    <p class="empty-title">Do Bio-Matric Ekyc</p>
                    
                      <br>
                     

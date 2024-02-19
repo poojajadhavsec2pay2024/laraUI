@@ -5,9 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use app\Helpers\DMTV5Helper;
 use Session;
-use App\models\StateDistrict;
+use App\models\IndiaStateDistrict;
 use App\models\NepalDtateDistrict;
-use App\models\InstantPayRemitterReport;
+use App\models\IndoNepalRemitters;
+use App\models\ReportDmt;
 use App\models\Global_Settings;
 
 class DMTV5Controller extends Controller
@@ -330,7 +331,7 @@ class DMTV5Controller extends Controller
         $mockmode = true;
         $mockmodestatus="SUCCESS";//FAILED,PENDING
 
-        $instantPay_RemitterReport =InstantPayRemitterReport::create(['name'=>$request->name,
+        $instantPay_RemitterReport =IndoNepalRemitters::create(['name'=>$request->name,
            'gender'=>$request->gender,
            'dob'=>$request->dob,
            'address'=>$request->address,
@@ -358,7 +359,7 @@ class DMTV5Controller extends Controller
 
         if($result['apistatus'] == 'REGISTRATION_SUCCESSFUL'){
 
-            $updateRemitterReport=InstantPayRemitterReport::where('id',$insertedId)
+            $updateRemitterReport=IndoNepalRemitters::where('id',$insertedId)
             ->update([
             'status' =>'registered',
             'apiremark'=>$result['apiremark'],
@@ -405,6 +406,8 @@ class DMTV5Controller extends Controller
     }
     public function remitterEkycInitiate(Request $request)
     {
+
+        sleep(3);
         $request->validate([
             'remitterId' => 'required'
          ]);
@@ -416,7 +419,7 @@ class DMTV5Controller extends Controller
         $result = \DmtApiv5::remitterEkycInitiate($data, $mockmode,$mockmodestatus);
         
         if($result['apistatus'] == 'RIMITTER_INITIATE_SUCCESSFUL'){ 
-            $updateRemitterReport=InstantPayRemitterReport::where('remitter_id',$request->remitterId)->where('user_id',\Auth::id())
+            $updateRemitterReport=IndoNepalRemitters::where('remitter_id',$request->remitterId)->where('user_id',\Auth::id())
             ->update([
             'status' =>'rbl_pending',
             'apiremark'=>$result['apiremark'],
@@ -465,7 +468,7 @@ class DMTV5Controller extends Controller
         $result = \DmtApiv5::remitterEkycInitiateStatus($data, $mockmode,$mockmodestatus);
        // dd($result);
         if($result['apistatus'] == 'EKYC_SUCCESSFUL'){ 
-            $updateRemitterReport=InstantPayRemitterReport::where('remitter_id',$request->remitterId)->where('user_id',\Auth::id())
+            $updateRemitterReport=IndoNepalRemitters::where('remitter_id',$request->remitterId)->where('user_id',\Auth::id())
             ->update([
             'apiremark'=>$result['apiremark'],
             'status' =>'rbl_done'
@@ -523,13 +526,13 @@ class DMTV5Controller extends Controller
         $mockmodestatus="SUCCESS";//FAILED,PENDING
         $result = \DmtApiv5::remitterEkycProcess($data, $mockmode,$mockmodestatus);
         if($result['apistatus'] == 'REMITTER_EKYC_SUCCESS'){
-            $updateRemitterReport=InstantPayRemitterReport::where('remitter_id',$request->remitterId)->where('user_id',\Auth::id())
+            $updateRemitterReport=IndoNepalRemitters::where('remitter_id',$request->remitterId)->where('user_id',\Auth::id())
             ->update([
             'status' =>'ekyc_done'
                  ]);
         }
         else{
-            $updateRemitterReport=InstantPayRemitterReport::where('remitter_id',$request->remitterId)->where('user_id',\Auth::id())
+            $updateRemitterReport=IndoNepalRemitters::where('remitter_id',$request->remitterId)->where('user_id',\Auth::id())
             ->update([
             'status' =>'ekyc_pending'
                  ]);
@@ -691,14 +694,14 @@ class DMTV5Controller extends Controller
     }
     public function fundTransfer(Request $request)
     {
+       // dd($request->all());
         $data['api']="instantpayfundTransfer";
         $data["via"]="web";
-        $minFloat=11111111111111111111111111;
-        $maxFloat=99999999999999999999999999;
-        $min = (int)$minFloat;
-        $max = (int)$maxFloat;
-        $externalRef =rand($min, $max);
-        $data["externalRef"] = "$externalRef";
+        //do {
+            $request['txnid'] = $this->transcode().rand(1111111111, 9999999999);
+      //  } while (ReportDmt::where("txnid", "=", $request->txnid)->first() instanceof DMTReport);
+       
+        $data["externalRef"] =$request['txnid'];
        
        // $data["externalRef"]=$externalRef;
         $data["remitterMobile"]=$request->remitterMobile;
@@ -712,62 +715,100 @@ class DMTV5Controller extends Controller
         //$data["latitude"]=$request->latitude;
         //$data["longitude"]=$request->longitude;
         $mockmode = true;
-        $mockmodestatus="SUCCESS";//FAILED,PENDING
-
-        $instantPay_RemitterReport =ReportDmt::create(['name'=>$request->name,
-           'gender'=>$request->gender,
-           'dob'=>$request->dob,
-           'address'=>$request->address,
-           'mobile'=>$request->mobileno,
-           'state'=>$request->state,
-           'district'=>$request->district,
-           'city'=>$request->city,
-           'nationality'=>$request->nationality,
-           'email'=>$request->email,
-           'employer'=>$request->employer,
-           'idType'=>$request->idType,
-           'idNumber'=>$request->idNumber,
-           'idExpiryDate'=>$request->idExpiryDate,
-           'idIssuedPlace'=>$request->idIssuedPlace,
-           'incomeSource'=>$request->incomeSource,
-           'remitterType'=>$request->remitterType,
-           'incomeSourceType'=>$request->incomeSourceType,
-           'annualIncome'=>$request->annualIncome,
-           'otp'=>$request->otp,
-           'status'=>'Pending',
-           'user_id'=>\Auth::id()
+        $mockmodestatus="FAILED";//FAILED,PENDING,SUCCESS
+        if($request->receiver_paymentMode=='Cash Payment')
+        {
+            $paymentMode='cashpayment';
+        }else{
+            $paymentMode='accountdeposit';
+        }
+        $instantPayReportDmt =ReportDmt::create([
+            'mobile'=>$request->remitterMobile,
+            'txnid'=>$data["externalRef"],
+            'sender_name'=>$request->sen_name,
+            'beneficiary_id'=>$request->beneficiaryId,
+            'beneficiary_name'=>$request->b_name,
+            'beneficiary_account'=>$request->rec_account,
+            'beneficiary_bankid'=>$request->rec_bankBranchId,
+            'amount'=>$request->transferAmount,
+            'transfer_mode'=>$paymentMode,
+            'charge'=>$request->service_rate,
+            'status'=>'pending',
+            'source'=>'s2p',
+            'api_id'=>'110',
+            'via'=>$data["via"],
+            'lat'=>"10.0000",
+            'lon'=>"20.0000",
+            'user_id'=>\Auth::id(),
+            'ip'=>getHostByName(getHostName()),
         ]);
-            $insertedId = $instantPay_RemitterReport->id;
+        $reportDmtinsertedId = $instantPayReportDmt->id;
         $result = \DmtApiv5::fundTransfer($data, $mockmode,$mockmodestatus);
         
         if($result['apistatus'] == 'TRANSFER_SUCCESSFUL'){ 
+            $updateFundTransfer=ReportDmt::where('id',$reportDmtinsertedId)->where('user_id',\Auth::id())
+            ->update([
+            'status' =>'success',
+            'apiremark'=>$result['apiremark'],
+            'refno'=>$result['data']->txnReferenceId,
+            'refno2'=>$result['data']->poolReferenceId
+                 ]);
             $output['status'] = $result['status'];
             $output['act'] = "CONTINUE";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
             $output['message'] = $result['message'];
+            if (isset($result['data']->pool)) {
+                unset($result['data']->pool);
+            }
             $output['data']= $result['data'];
-            
         }
         else if($result['apistatus'] == 'TRANSFER_PENDING'){
-            
+            $updateFundTransfer=ReportDmt::where('id',$reportDmtinsertedId)->where('user_id',\Auth::id())
+            ->update([
+            'status' =>'pending',
+            'apiremark'=>$result['apiremark'],
+            'refno'=>$result['data']->txnReferenceId,
+            'refno2'=>$result['data']->poolReferenceId
+                 ]);
             $output['status'] = $result['status'];
             $output['act'] = "TERMINATE";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
             $output['message'] = $result['message'];
+            if (isset($result['data']->pool)) {
+                 unset($result['data']->pool);
+            }
             $output['data']= $result['data'];
+           
         }
         else if($result['apistatus'] == 'TRANSFER_FAILED'){
-            
+            $updateFundTransfer=ReportDmt::where('id',$reportDmtinsertedId)->where('user_id',\Auth::id())
+            ->update([
+            'status' =>'failed',
+            'apiremark'=>$result['apiremark'],
+            'refno'=>$result['data']->txnReferenceId,
+            'refno2'=>$result['data']->poolReferenceId
+                 ]);
             $output['status'] = $result['status'];
             $output['act'] = "RETRY";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
             $output['message'] = $result['message'];
+            if (isset($result['data']->pool)) {
+                unset($result['data']->pool);
+            }
             $output['data']= $result['data'];
+           
         }
         else {
+            $updateFundTransfer=ReportDmt::where('id',$reportDmtinsertedId)->where('user_id',\Auth::id())
+            ->update([
+            'status' =>'failed',
+            'apiremark'=>$result['apiremark'],
+            'refno'=>$result['data']->txnReferenceId,
+            'refno2'=>$result['data']->poolReferenceId
+                 ]);
             $output['status'] = "failed";
             $output['act'] = "TERMINATE";
             $output['apistatus']='API_CALLFAILED';
@@ -791,6 +832,15 @@ class DMTV5Controller extends Controller
         dd($result);
     
     }
+    public function transcode()
+    {
+    $code = \DB::table('companies')->where('domain', $_SERVER['HTTP_HOST'])->first();
+        if($code){
+      return $code->txnprefix;
+        }else{
+            return "SECP";
+        }
+    }
     public function instantPayRemitterRegister(Request $request)
     {
            
@@ -805,8 +855,8 @@ class DMTV5Controller extends Controller
             }
          
             $user_id=\Auth::id();
-            $statedata = StateDistrict::distinct()->select('state','stateCode')->get();
-            $remitterInfo = InstantPayRemitterReport::where('user_id',$user_id)->where('mobile',$mobile)->first();
+            $statedata = IndiaStateDistrict::distinct()->select('state','stateCode')->get();
+            $remitterInfo = IndoNepalRemitters::where('user_id',$user_id)->where('mobile',$mobile)->first();
             $version_value  = Global_Settings::get();
             $data['statedata']=$statedata;
             $data['remitterInfo']=$remitterInfo;
@@ -834,7 +884,7 @@ class DMTV5Controller extends Controller
     public function getDistrict(Request $request)
     {
        // dd($request->statecode);
-            $data = StateDistrict::where('stateCode',$request->statecode)->distinct()->pluck('district');
+            $data = IndiaStateDistrict::where('stateCode',$request->statecode)->distinct()->pluck('district');
            // dd($data);
            $output['status']='success';
            $output['message']='District Fetch Successfully';

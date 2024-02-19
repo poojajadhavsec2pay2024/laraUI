@@ -465,6 +465,7 @@
                             <input type="hidden" id="sen_name" name="sen_name" value="">
                             <input type="hidden" id="remitterMobile" name="remitterMobile" value="">
                             <input type="hidden" id="beneficiaryId" name="beneficiaryId" value="">
+                            <input type="hidden" id="service_rate" name="service_rate" value="">
                             <div class="row">
                             <div>
                                <div class="form-group col-12 mb-3 row">
@@ -562,11 +563,58 @@
                                 <button class="btn btn-primary" type="button" id="mobilebtn" name="mobilebtn">Get OTP</button>
                                 </div>
                             <div class="row" id="submitotpblock_fundtransfer" style="display:none">
-                                <div class="form-group col-6 mb-3">
+                            <div class="card-body">
+            <h2 class="card-title card-title-lg text-center mb-4">Authenticate Your Account</h2>
+            <p class="my-4 text-center">Please confirm your account by entering the authorization code sent to <strong id="sender_otp">-</strong>.</p>
+            <div class="my-5">
+              <div class="row g-4">
+                <div class="col">
+                  <div class="row g-2">
+                    <div class="col">
+                      <input type="text" class="form-control form-control-lg text-center py-3" maxlength="1" inputmode="numeric" pattern="[0-9]*" data-code-input="">
+                    </div>
+                    <div class="col">
+                      <input type="text" class="form-control form-control-lg text-center py-3" maxlength="1" inputmode="numeric" pattern="[0-9]*" data-code-input="">
+                    </div>
+                    <div class="col">
+                      <input type="text" class="form-control form-control-lg text-center py-3" maxlength="1" inputmode="numeric" pattern="[0-9]*" data-code-input="">
+                    </div>
+                  </div>
+                </div>
+                <div class="col">
+                  <div class="row g-2">
+                    <div class="col">
+                      <input type="text" class="form-control form-control-lg text-center py-3" maxlength="1" inputmode="numeric" pattern="[0-9]*" data-code-input="">
+                    </div>
+                    <div class="col">
+                      <input type="text" class="form-control form-control-lg text-center py-3" maxlength="1" inputmode="numeric" pattern="[0-9]*" data-code-input="">
+                    </div>
+                    <div class="col">
+                      <input type="text" class="form-control form-control-lg text-center py-3" maxlength="1" inputmode="numeric" pattern="[0-9]*" data-code-input="">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- <div class="my-4">
+              <label class="form-check">
+                <input type="checkbox" class="form-check-input">
+                Dont't ask for codes again on this device
+              </label>
+            </div> -->
+            <div class="form-footer">
+              <div class="btn-list flex-nowrap">
+              <input type="hidden" class="form-control" id="otpReference" name="otpReference" >
+              <button id="btn-sendMoney" type="submit" class="btn btn-primary" style="display:none">Submit</button>
+                </a>
+              </div>
+            </div>
+          </div>
+                                <!-- <div class="form-group col-6 mb-3">
                                     <label class="form-label required text-muted">Enter OTP</label>
                                     <input type="text" class="form-control field-disable"  id="otp" name="otp" data-validetta="required" class="form-control field-disable" data-vd-message-required="Please enter OTP">   
                                     <input type="hidden" class="form-control" id="otpReference" name="otpReference" >
-                                </div>
+                                </div> -->
                                 <div class="text-end">
                                 <button id="btn-sendMoney" type="submit" class="btn btn-primary" style="display:none">Submit</button>
                                 </div>
@@ -872,6 +920,21 @@
             $('#sender_details').hide();
             $('#beneficiary_details').hide();
             
+            var inputs = $('input[data-code-input]');
+
+            // Add event listener for input on these fields
+            inputs.on('input', function() {
+                var $this = $(this);
+                var maxLength = $this.attr('maxlength');
+                var length = $this.val().length;
+
+                // If the current input is filled and the next input exists, move cursor to it
+                if (length === maxLength && $this.next('input').length) {
+                    var nextInput = $this.next('input');
+                    nextInput.focus();
+                    nextInput.select(); // Select the text inside the input
+                }
+            });
             //Check if mobile number is registered. 
             $('#dmtmobile').validetta({
                 realTime: true,
@@ -1370,7 +1433,8 @@
 
                         $("#sender_name").text(sender_name);
                         $("#sender_mobile").text(sender_mobile);
-                       
+                        $("#sender_otp").text(sender_mobile);
+                        
                         $('#ben_name').text($.trim(bene_name));
                         $('#ben_mobile').text($.trim(bene_mobile));
                         
@@ -1399,6 +1463,7 @@
                     var payoutAmount = $('#payoutAmount').val();
                     var transferAmount2 = $('#transferAmount').val();  
                     var country = 'Nepal';
+                 
                     $.ajax({
                         type: 'POST', // The HTTP method to use
                         url: '{{ route('serviceCharge') }}', // The URL of the controller action to call
@@ -1420,6 +1485,7 @@
                                 $('#collectionamount').text($.trim(data.data.collectionAmount));
                                 $('#payoutamount').text($.trim(data.data.payoutAmount));
                                 $('#exchangerate').text($.trim(data.data.exchangeRate));
+                                $('#service_rate').val($.trim(data.data.serviceCharge));
                                 
                             } else if (data.act == "RETRY") {
                                 // $("#mobilebtn").removeClass('btn-loading');
@@ -1520,9 +1586,16 @@
                     $('.field-disable').prop('readonly', true);
                     var trans_amount = $("#transferAmount").val(); // Get the value from the input field
                     event.preventDefault();
+                    var authCode = '';
+                    $('input[data-code-input]').each(function() {
+                        authCode += $(this).val();
+                    });
+                    var requestData = $("#send-money").serialize();
+                    requestData += '&otp=' + authCode;
+
                     $.ajax({
                       url: '{{ route('fundTransfer') }}',
-                      data: $("#send-money").serialize(),
+                      data: requestData,
                       dataType: 'json',
                       method: 'post'
                     })

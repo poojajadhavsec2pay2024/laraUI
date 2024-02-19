@@ -1184,6 +1184,7 @@ class DMTV5Helper {
         if(!$mockMode){
                     
             $result = \PortalAPIHub::curl($product, $url, "POST", $parameters, $instantpayData["header"], "YES", "DMTV5Helper", $txnID);
+           
             if($result["code"]!=200){
                 $resMessage=json_decode($result['response']);
                 $output["status"]="success";
@@ -1215,6 +1216,7 @@ class DMTV5Helper {
            $output['apistatus']='BENEFICIARY_REGISTER_SUCCESSFULLY';
            $output['message'] = "Beneficiary Added Successfully";
            $output['apiremark']=isset($jsonD->status) ? $jsonD->status : "NA";
+          
            $output['data'] = $jsonD->data;
         }
         else if (in_array($jsonD->statuscode, ['IVC','ERR','RPI','ISE']))   
@@ -1389,7 +1391,7 @@ class DMTV5Helper {
         }
         else if ($jsonD->statuscode=='TUP')   
         { 
-            $output['status'] = "pending";
+            $output['status'] = "success";
             $output['apistatus']='TRANSFER_PENDING';
             $output['message']= "Transaction Under Progress";
             $output['apiremark']= isset($jsonD->status) ? $jsonD->status : "NA";

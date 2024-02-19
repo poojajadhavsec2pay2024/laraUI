@@ -5,7 +5,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\TestController;
 use App\Models\ApilogsDMT;
-use App\Models\ApilogsInstantPayDMT;
+use App\Models\ApilogsIndoNepalDMT;
 use App\Models\ApilogsAEPS;
 use DB;
 class PortalAPIHub {
@@ -48,7 +48,7 @@ public static function curl($product, $url , $method='GET', $parameters, $header
             ]);
         }
         if(in_array($product, ["InstantpayDMT"])){
-            ApilogsInstantPayDMT::create([
+            ApilogsIndoNepalDMT::create([
                 "product"=>$product,
                 "url" => $url,
                 "source" => $source,
