@@ -97,6 +97,8 @@ class DMTV5Controller extends Controller
         $result = \DmtApiv5::staticData($data, $mockmode,$mockmodestatus);
        dd($result);
     }
+
+        /*This API Used to Fetch the location of PAyment*/
     public function paymentLocationList(Request $request)
     {
         $request->validate([
@@ -120,21 +122,21 @@ class DMTV5Controller extends Controller
 
         $result = \DmtApiv5::paymentLocationList($data, $mockmode,$mockmodestatus);
         if($result['apistatus'] == 'LOCATION_FETCHED_SUCCFULLY'){
-            $output['status'] = $result['status'];
+            $output['status'] = "success";
             $output['act'] = "CONTINUE";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
-            $output['message'] = $result['message'];
+            $output['message'] = isset($result['apiremark']) ? $result['apiremark'] : "Payment Location List Fetch successfully";
             $output['data']= $result['data'];
             
             
         }
         else if($result['apistatus'] == 'LOCATION_FETCH_FAILED'){
-            $output['status'] = $result['status'];
+            $output['status'] = "failed";
             $output['act'] = "RETRY";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
-            $output['message'] = $result['message'];
+            $output['message'] = isset($result['apiremark']) ? $result['apiremark'] : "Unable to fetch the payment location list";
             $output['data']= $result['data'];
             
         }else {
@@ -194,18 +196,18 @@ class DMTV5Controller extends Controller
         $result = \DmtApiv5::remitterProfile($data, $mockmode,$mockmodestatus);
        
         if($result['apistatus'] == 'REGISTERED'){
-            $output['status'] = $result['status'];
+            $output['status'] = "success";
             $output['act'] = "CONTINUE";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
-            $output['message'] = $result['message'];
+            $output['message'] = isset($result['apiremark']) ? $result['apiremark'] : "Data Fetch Sucessfully";
             $output['data']= $result['data'];
             Session::put('remitter_mobileNumber', $request->mobile);
             Session::put('senderID', $result['data']->id);
             
         }
         else if($result['apistatus'] == 'NOT_REGISTERED'){
-            $output['status'] = $result['status'];
+            $output['status'] = "success";
             $output['act'] = "CONTINUE";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
@@ -254,7 +256,7 @@ class DMTV5Controller extends Controller
         $mockmodestatus="SUCCESS";//FAILED,PENDING
         $result = \DmtApiv5::sendOtp($data, $mockmode,$mockmodestatus);
         if($result['apistatus'] == 'OTP_SEND'){
-            $output['status'] = $result['status'];
+            $output['status'] = "success";
             $output['act'] = "CONTINUE";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
@@ -263,7 +265,7 @@ class DMTV5Controller extends Controller
             
         }
         else if($result['apistatus'] == 'OTP_SEND_FAILED'){
-            $output['status'] = $result['status'];
+            $output['status'] = "success";
             $output['act'] = "RETRY";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
@@ -366,7 +368,7 @@ class DMTV5Controller extends Controller
             'remitter_id'=>$result['data']->id
                  ]);
             //$updateRemitterReport->status = "Registered";
-            $output['status'] = $result['status'];
+            $output['status'] = "success";
             $output['act'] = "CONTINUE";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
@@ -378,7 +380,7 @@ class DMTV5Controller extends Controller
         }
         else if($result['apistatus'] == 'REGISTRATION_INPROCESS'){
            
-            $output['status'] = $result['status'];
+            $output['status'] = "success";
             $output['act'] = "RETRY";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
@@ -387,7 +389,7 @@ class DMTV5Controller extends Controller
         }
         else if($result['apistatus'] == 'REGISTRATION_INVALID_INPUT'){
            
-            $output['status'] = $result['status'];
+            $output['status'] = "success";
             $output['act'] = "RETRY";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
@@ -425,7 +427,7 @@ class DMTV5Controller extends Controller
             'apiremark'=>$result['apiremark'],
             'referenceKey'=>$result['data']->referenceKey
                  ]);
-            $output['status'] = $result['status'];
+            $output['status'] = "success";
             $output['act'] = "CONTINUE";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
@@ -436,7 +438,7 @@ class DMTV5Controller extends Controller
             
         }
         else if($result['apistatus'] == 'REMITTER_INITIATE_FAILED'){
-            $output['status'] = $result['status'];
+            $output['status'] = "success";
             $output['act'] = "RETRY";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
@@ -464,7 +466,7 @@ class DMTV5Controller extends Controller
         $data["referenceKey"] =$request->referenceKey;
        
         $mockmode = true;
-        $mockmodestatus="SUCCESS";//FAILED,PENDING
+        $mockmodestatus="FAILED";//FAILED,PENDING
         $result = \DmtApiv5::remitterEkycInitiateStatus($data, $mockmode,$mockmodestatus);
        // dd($result);
         if($result['apistatus'] == 'EKYC_SUCCESSFUL'){ 
@@ -473,7 +475,7 @@ class DMTV5Controller extends Controller
             'apiremark'=>$result['apiremark'],
             'status' =>'rbl_done'
                  ]);
-            $output['status'] = $result['status'];
+            $output['status'] = "success";
             $output['act'] = "CONTINUE";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
@@ -483,7 +485,7 @@ class DMTV5Controller extends Controller
             
         }
         else if($result['apistatus'] == 'EKYC_UNDER_PROCESS'){
-            $output['status'] = $result['status'];
+            $output['status'] = "pending";
             $output['act'] = "RETRY";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
@@ -491,7 +493,7 @@ class DMTV5Controller extends Controller
             $output['data']= $result['data'];
         }
         else if($result['apistatus'] == 'REMITTER_EKYC_FAILED'){
-            $output['status'] = $result['status'];
+            $output['status'] = "success";
             $output['act'] = "RETRY";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
@@ -539,7 +541,7 @@ class DMTV5Controller extends Controller
         }
        
         if($result['apistatus'] == 'REMITTER_EKYC_SUCCESS'){ 
-            $output['status'] = $result['status'];
+            $output['status'] = "success";
             $output['act'] = "CONTINUE";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
@@ -549,7 +551,7 @@ class DMTV5Controller extends Controller
         }
         else if($result['apistatus'] == 'REMITTER_EKYC_UNDER_PROCESS'){
             
-            $output['status'] = $result['status'];
+            $output['status'] = "pending";
             $output['act'] = "RETRY";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
@@ -557,7 +559,7 @@ class DMTV5Controller extends Controller
             $output['data']= $result['data'];
         }
         else if($result['apistatus'] == 'REMITTER_EKYC_FAILED'){
-            $output['status'] = $result['status'];
+            $output['status'] = "success";
             $output['act'] = "RETRY";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];

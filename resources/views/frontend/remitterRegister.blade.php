@@ -6,6 +6,8 @@
 ?>
 <link href="{{url('frontend/dist/css/webToast.min.css')}}" rel="stylesheet"/>
 <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">  
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script type="text/javascript" src="{{url('frontend/dist/js/webToast.min.js')}}"></script>
 <script src="{{url('frontend/dist/js/validetta.min.js')}}"></script>
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -29,201 +31,218 @@
         <!--content start--->
 
           
-        <div class="col-lg-12">
-              <div class="row row-cards">
-                <div class="col-8">
-                  <form class="card" id="dmtremitterreg" method="POST" action="{{ route('remitterRegistration')}}">
-                  @csrf
-                  <input type="hidden" class="form-control" id="operation" name="operation" value="REMITTER_REGISTRATION">
-                    <input type="hidden" class="form-control" id="otpReference" name="otpReference" value="b05483ba-9714-4a7c-b861-2790c0721fa6">                   
-                    <input type="hidden" class="form-control" id="idExpiryDate" name="idExpiryDate" value="">
-                    <input type="hidden" class="form-control" id="idIssuedPlace" name="idIssuedPlace" value=""> 
-                     <input type="hidden" class="form-control" id="mobileno" name="mobileno"> 
-                    
-                    <div class="card-body">
-                      <h3 class="card-title">Add Remitter</h3>
-                      <div class="row row-cards">
-                      <div class="col-md-6 col-md-6">
-                          <div class="mb-3">
+  <div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <form class="card" id="dmtremitterreg" method="POST" action="{{ route('remitterRegistration')}}">
+                @csrf
+                <input type="hidden" class="form-control" id="operation" name="operation" value="REMITTER_REGISTRATION">
+                <input type="hidden" class="form-control" id="otpReference" name="otpReference" value="b05483ba-9714-4a7c-b861-2790c0721fa6">
+                <input type="hidden" class="form-control" id="idExpiryDate" name="idExpiryDate" value="">
+                <input type="hidden" class="form-control" id="idIssuedPlace" name="idIssuedPlace" value="">
+                <input type="hidden" class="form-control" id="mobileno" name="mobileno">
+
+                <div class="card-body">
+                    <h3 class="card-title">Add Remitter</h3>
+
+                    <div class="row g-3">
+                        <div class="col-md-14">
+                            <div class="mb-3">
                                 <label class="form-label">Mobile</label>
-                                <div class="input-group mb-2">
+                                <div class="input-group">
                                     <input type="text" class="form-control field-disable" id="mobile" name="mobile" placeholder="Enter the Mobile number" data-validetta="number,required,minLength[10],maxLength[10]" value="{{ isset($data['remitterInfo']->mobile) ? $data['remitterInfo']->mobile : $data['mobile']}}" @if(!$data['isEditable']) disabled @endif>
-                                      <button class="btn" type="button" id="mobilebtn" name="mobilebtn" @if(!$data['isEditable']) disabled @endif>Go!</button>
-                                     
-                                    </div>  
-                                                            
+                                    <button class="btn btn-primary" type="button" id="mobilebtn" name="mobilebtn" @if(!$data['isEditable']) disabled @endif>Go!</button>
+                                </div>
                             </div>
-                            
                         </div>
+
                         @if($data['remitterInfo'])
                         <div class="row" id="remitterform" style="display:show"> 
                         @else
                         <div class="row" id="remitterform" style="display:none"> 
                         @endif
-                        <div class="col-sm-6 col-md-6" >
-                          <div class="mb-3">
-                            <label class="form-label">Enter Otp</label>
-                            <input type="text" class="form-control field-disable"  id="otp" name="otp" data-validetta="required" class="form-control field-disable" data-vd-message-required="Please enter OTP" value="{{ isset($data['remitterInfo']->mobile) ? $data['remitterInfo']->mobile : ''}}"  @if(!$data['isEditable']) disabled @endif>
-                          </div>
+                        <!-- Column for OTP and Name -->
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Enter Otp</label>
+                                <input type="text" class="form-control field-disable" id="otp" name="otp" data-validetta="required" class="form-control field-disable" data-vd-message-required="Please enter OTP" value="{{ isset($data['remitterInfo']->mobile) ? $data['remitterInfo']->mobile : ''}}" @if(!$data['isEditable']) disabled @endif>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Name</label>
+                                <input type="text" class="form-control field-disable" id="name" name="name" placeholder="Username" autocomplete="off" data-validetta="required" value="{{ isset($data['remitterInfo']->mobile) ? $data['remitterInfo']->mobile : ''}}" @if(!$data['isEditable']) disabled @endif>
+                            </div>
                         </div>
-                       
-                        <div class="col-sm-6 col-md-6">
-                          <div class="mb-3">
-                            <label class="form-label">Name</label>
-                            <input type="text" class="form-control field-disable" id="name" name="name" placeholder="Username" autocomplete="off" data-validetta="required" value="{{ isset($data['remitterInfo']->mobile) ? $data['remitterInfo']->mobile : ''}}"  @if(!$data['isEditable']) disabled @endif>
-                          </div>
-                        </div>
-                        <div class="col-sm-6 col-md-6">
-                          <div class="mb-3">
-                            <label class="form-label">Gender</label>
-                            <select class="form-select field-disable" id="gender" name="gender"  @if(!$data['isEditable']) disabled @endif>
-                              <option value="" @if($data['remitterInfo']) {{!$data['remitterInfo']->remitterType ? 'selected' : '' }} @endif>Select Gender</option>
+                        <!-- End OTP and Name column -->
+
+                        <!-- Column for Gender and DOB -->
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Gender</label>
+                                <select class="form-select field-disable" id="gender" name="gender" @if(!$data['isEditable']) disabled @endif>
+                                  <option value="" @if($data['remitterInfo']) {{!$data['remitterInfo']->remitterType ? 'selected' : '' }} @endif>Select Gender</option>
                               <option value="Male" @if($data['remitterInfo']){{$data['remitterInfo']->gender == 'Male' ? 'selected' : '' }}@endif>Male</option>
                               <option value="Female" @if($data['remitterInfo']){{$data['remitterInfo']->gender == 'Female' ? 'selected' : '' }}@endif>Female</option>
                               <option value="Other" @if($data['remitterInfo']){{$data['remitterInfo']->gender == 'Other' ? 'selected' : '' }} @endif>Other</option>
-                            </select>
-                          </div>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">DOB</label>
+                                <input type="date" name="dob" class="form-control field-disable bs-validate" data-validetta="required" placeholder="Select a date" id="dob" data-vd-message-required="Please select a date" autofill="off" value="{{ isset($data['remitterInfo']->dob) ? $data['remitterInfo']->dob : ''}}" @if(!$data['isEditable']) disabled @endif>
+                            </div>
                         </div>
-                        <div class="col-sm-6 col-md-6">
-                          <div class="mb-3">
-                            <label class="form-label">DOB</label>
-                            <input type="date" name="dob" class="form-control field-disable" data-validetta="required" placeholder="Select a date" id="dob" data-vd-message-required="Please select a date" autofill="off" value="{{ isset($data['remitterInfo']->dob) ? $data['remitterInfo']->dob : ''}}"  @if(!$data['isEditable']) disabled @endif>
-                          </div>
-                        </div>
-                        <div class="col-sm-6 col-md-6">
-                          <div class="mb-3">
-                            <label class="form-label">Nationality</label>
-                            <select class="form-select field-disable" id="nationality" name="nationality" data-validetta="required" @if(!$data['isEditable']) disabled @endif>
-                              <option value="" @if($data['remitterInfo']) {{ !$data['remitterInfo']->nationality ? 'selected' : '' }} @endif>Select Nationality</option>
+                        <!-- End Gender and DOB column -->
+
+                        <!-- Column for Nationality and Email -->
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Nationality</label>
+                                <select class="form-select field-disable" id="nationality" name="nationality" data-validetta="required" @if(!$data['isEditable']) disabled @endif>
+                                <option value="" @if($data['remitterInfo']) {{ !$data['remitterInfo']->nationality ? 'selected' : '' }} @endif>Select Nationality</option>
                               <option value="Nepalese" @if($data['remitterInfo']){{ $data['remitterInfo']->nationality == 'Nepalese' ? 'selected' : '' }} @endif>Nepalese</option>
-                            </select>
-                          </div>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Email</label>
+                                <input type="email" id="email" name="email" class="form-control field-disable" placeholder="Email Address" data-validetta="required,email" value="{{ isset($data['remitterInfo']->email) ? $data['remitterInfo']->email : ''}}" @if(!$data['isEditable']) disabled @endif >
+                            </div>
                         </div>
-                        <div class="col-sm-6 col-md-6">
-                          <div class="mb-3">
-                            <label class="form-label">Email</label>
-                            <input type="email" id="email" name="email" class="form-control field-disable" placeholder="Email Address" data-validetta="required,email" value="{{ isset($data['remitterInfo']->email) ? $data['remitterInfo']->email : ''}}"  @if(!$data['isEditable']) disabled @endif >
-                          </div>
+                        <!-- End Nationality and Email column -->
+
+                        <!-- Column for Address -->
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <label class="form-label">Address</label>
+                                <input type="text" id="address" name="address" class="form-control field-disable" placeholder="Home Address" data-validetta="required" value="{{ isset($data['remitterInfo']->address) ? $data['remitterInfo']->address : ''}}" @if(!$data['isEditable']) disabled @endif>
+                            </div>
                         </div>
-                        <div class="col-sm-6 col-md-6">
-                          <div class="mb-3">
-                            <label class="form-label">Address</label>
-                            <input type="text" id="address" name="address" class="form-control field-disable" placeholder="Home Address" data-validetta="required" value="{{ isset($data['remitterInfo']->address) ? $data['remitterInfo']->address : ''}}"  @if(!$data['isEditable']) disabled @endif>
-                          </div>
+                        <!-- End Address column -->
+
+                        <!-- Column for Employer -->
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Employer</label>
+                                <input type="text" id="employer" name="employer" class="form-control field-disable" placeholder="Company Name" data-validetta="required" value="{{ isset($data['remitterInfo']->employer) ? $data['remitterInfo']->employer : ''}}" @if(!$data['isEditable']) disabled @endif>
+                            </div>
                         </div>
-                        <div class="col-sm-6 col-md-6">
-                          <div class="mb-3">
-                            <label class="form-label">employer</label>
-                            <input type="text" id="employer" name="employer" class="form-control field-disable" placeholder="Comany Name" data-validetta="required" value="{{ isset($data['remitterInfo']->employer) ? $data['remitterInfo']->employer : ''}}"  @if(!$data['isEditable']) disabled @endif>
-                          </div>
-                        </div>
-                        <div class="col-sm-6 col-md-4">
-                          <div class="mb-3">
-                            <label class="form-label">State</label>
-                            <select class="form-select field-disable" id="state" name="state" data-validetta="required"  @if(!$data['isEditable']) disabled @endif>
-                            <option value="" @if($data['remitterInfo']){{ !$data['remitterInfo']->state ? 'selected' : '' }} @endif>Select State</option>
+                        <!-- End Employer column -->
+
+                        <!-- Column for State, District, and City -->
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">State <i id="statespin" class="" style="font-size:24px,"></i></label>
+                                
+                                <select  class="form-select field-disable" id="state" name="state" data-validetta="required" @if(!$data['isEditable']) disabled @endif>
+                                <option value="" @if($data['remitterInfo']){{ !$data['remitterInfo']->state ? 'selected' : '' }} @endif>Select State</option>
                             @foreach ($data['statedata'] as $statevalue)
                             <option value="{{$statevalue->stateCode}}" @if($data['remitterInfo']){{ $data['remitterInfo']->state == $statevalue->stateCode ? 'selected' : '' }} @endif>{{$statevalue->state}}</option>
                                     @endforeach
-                            </select>                          </div>
+                                </select>
+                               
+                            </div>
+                           
                         </div>
-                        <div class="col-sm-6 col-md-4">
-                          <div class="mb-3">
-                            <label class="form-label">District</label>
-                            <select class="form-select field-disable" id="district" name="district" data-validetta="required"  @if(!$data['isEditable']) disabled @endif>
-                              <option value="" @if($data['remitterInfo']) {{ !$data['remitterInfo']->district ? 'selected' : '' }} @endif>Select District</option>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">District  <i id="districtspin" class="" style="font-size:24px,"></i> </label>
+                                <select class="form-select field-disable" id="district" name="district" data-validetta="required" @if(!$data['isEditable']) disabled @endif>
+                                <option value="" @if($data['remitterInfo']) {{ !$data['remitterInfo']->district ? 'selected' : '' }} @endif>Select District</option>
                               @if($data['remitterInfo']) @if($data['remitterInfo']->district) @endif
                               <option value="{{$data['remitterInfo']->district}}" @if($data['remitterInfo']) {{ $data['remitterInfo']->district == $data['remitterInfo']->district ? 'selected' : '' }} @endif>{{$data['remitterInfo']->district}}</option>
                               @endif
-                            </select>
-                          </div>
+                                </select>
+                            </div>
                         </div>
                         <div class="col-md-4">
-                          <div class="mb-3">
-                            <label class="form-label">City</label>
-                            <input type="test" class="form-control field-disable" id="city" name="city" placeholder="City" data-validetta="required" value="{{ isset($data['remitterInfo']->city) ? $data['remitterInfo']->city : ''}}"  @if(!$data['isEditable']) disabled @endif>
-                          </div>
+                            <div class="mb-3">
+                                <label class="form-label">City <i id="cityspin" class="" style="font-size:24px,"></i></label>
+                                <input type="test" class="form-control field-disable" id="city" name="city" placeholder="City" data-validetta="required" value="{{ isset($data['remitterInfo']->city) ? $data['remitterInfo']->city : ''}}" @if(!$data['isEditable']) disabled @endif>
+                            </div>
                         </div>
-                        <div class="col-sm-6 col-md-6">
-                          <div class="mb-3">
-                            <label class="form-label">ID Type</label>
-                            <select class="form-select field-disable" id="idType" name="idType" data-validetta="required"  @if(!$data['isEditable']) disabled @endif>
-                              <option value="Aadhaar Card">Aadhaar Card</option>
-                            </select>
-                          </div>
+                        <!-- End State, District, and City column -->
+
+                        <!-- Column for ID Type and ID Number -->
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">ID Type</label>
+                                <select class="form-select field-disable" id="idType" name="idType" data-validetta="required" @if(!$data['isEditable']) disabled @endif>
+                                <option value="Aadhaar Card">Aadhaar Card</option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="col-sm-6 col-md-6">
-                          <div class="mb-3">
-                            <label class="form-label">Id Number</label>
-                            <input type="text" id="idNumber" name="idNumber" class="form-control field-disable" placeholder="Enter the Aadhar card Number" data-validetta="number,required,minLength[12],maxLength[12]" value="{{ isset($data['remitterInfo']->idNumber) ? $data['remitterInfo']->idNumber : ''}}"  @if(!$data['isEditable']) disabled @endif>
-                          </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">ID Number</label>
+                                <input type="text" id="idNumber" name="idNumber" class="form-control field-disable" placeholder="Enter the Aadhar card Number" data-validetta="number,required,minLength[12],maxLength[12]" value="{{ isset($data['remitterInfo']->idNumber) ? $data['remitterInfo']->idNumber : ''}}" @if(!$data['isEditable']) disabled @endif>
+                            </div>
                         </div>
-                        
-                        <div class="col-sm-6 col-md-6">
-                          <div class="mb-3">
-                            <label class="form-label">Remitter Type</label>
-                            <select class="form-select field-disable" id="remitterType" name="remitterType" data-validetta="required"  @if(!$data['isEditable']) disabled @endif>
-                            <option value=""  @if($data['remitterInfo']) {{ !$data['remitterInfo']->remitterType ? 'selected' : '' }} @endif>Select Remitter Type</option>
+                        <!-- End ID Type and ID Number column -->
+
+                        <!-- Column for Remitter Type, Income Source, Income Source Type, and Annual Income -->
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Remitter Type</label>
+                                <select class="form-select field-disable" id="remitterType" name="remitterType" data-validetta="required" @if(!$data['isEditable']) disabled @endif>
+                                <option value=""  @if($data['remitterInfo']) {{ !$data['remitterInfo']->remitterType ? 'selected' : '' }} @endif>Select Remitter Type</option>
                             <option value="1"  @if($data['remitterInfo']) {{  $data['remitterInfo']->remitterType == '1' ? 'selected' : '' }} @endif>Salaried</option>
                             <option value="2"  @if($data['remitterInfo']) {{ $data['remitterInfo']->remitterType == '2' ? 'selected' : '' }} @endif>Self Employed including Professional</option>
                             <option value="3"  @if($data['remitterInfo']) {{ $data['remitterInfo']->remitterType == '3' ? 'selected' : '' }} @endif>Farmer</option>
                             <option value="4" @if($data['remitterInfo']) {{ $data['remitterInfo']->remitterType == '4' ? 'selected' : '' }}@endif >Housewife</option>
-                        </select>
-
-                          </div>
+                                </select>
+                            </div>
                         </div>
-                        <div class="col-sm-6 col-md-6">
-                          <div class="mb-3">
-                            <label class="form-label">Income Source</label>
-                            <select class="form-select field-disable" id="incomeSource" name="incomeSource" data-validetta="required"  @if(!$data['isEditable']) disabled @endif>
-                              <option value="" @if($data['remitterInfo']) {{ !$data['remitterInfo']->incomeSource ? 'selected' : '' }} @endif>Select Income Source</option>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Income Source</label>
+                                <select class="form-select field-disable" id="incomeSource" name="incomeSource" data-validetta="required" @if(!$data['isEditable']) disabled @endif>
+                                <option value="" @if($data['remitterInfo']) {{ !$data['remitterInfo']->incomeSource ? 'selected' : '' }} @endif>Select Income Source</option>
                               <option value="Business" @if($data['remitterInfo']) {{ $data['remitterInfo']->incomeSource == 'Business' ? 'selected' : '' }} @endif>Business</option>
                               <option value="Gift" @if($data['remitterInfo']) {{ $data['remitterInfo']->incomeSource == 'Gift' ? 'selected' : '' }} @endif>Gift</option>
                               <option value="Lotery" @if($data['remitterInfo']) {{ $data['remitterInfo']->incomeSource == 'Lotery' ? 'selected' : '' }} @endif>Lotery</option>
                               <option value="Salary" @if($data['remitterInfo']) {{ $data['remitterInfo']->incomeSource == 'Salary' ? 'selected' : '' }} @endif>Salary</option>
                               <option value="Saving" @if($data['remitterInfo']) {{ $data['remitterInfo']->incomeSource == 'Saving' ? 'selected' : '' }} @endif>Saving</option>
                               <option value="Other" @if($data['remitterInfo']) {{ $data['remitterInfo']->incomeSource == 'Other' ? 'selected' : '' }} @endif>Other</option>
-                            </select>
-                          </div>
+                                </select>
+                            </div>
                         </div>
-                        <div class="col-sm-6 col-md-6">
-                          <div class="mb-3">
-                            <label class="form-label">Income Source Type</label>
-                            <select class="form-select field-disable" id="incomeSourceType" name="incomeSourceType" data-validetta="required"  @if(!$data['isEditable']) disabled @endif>
-                              <option value="" @if($data['remitterInfo']) {{ !$data['remitterInfo']->incomeSourceType ? 'selected' : '' }} @endif>Select Income Source Type</option>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Income Source Type</label>
+                                <select class="form-select field-disable" id="incomeSourceType" name="incomeSourceType" data-validetta="required" @if(!$data['isEditable']) disabled @endif>
+                                <option value="" @if($data['remitterInfo']) {{ !$data['remitterInfo']->incomeSourceType ? 'selected' : '' }} @endif>Select Income Source Type</option>
                               <option value="1" @if($data['remitterInfo']) {{ $data['remitterInfo']->incomeSourceType == '1' ? 'selected' : '' }} @endif>Govt</option>
                               <option value="2" @if($data['remitterInfo']) {{ $data['remitterInfo']->incomeSourceType == '2' ? 'selected' : '' }} @endif>Public sector</option>
                               <option value="3" @if($data['remitterInfo']) {{ $data['remitterInfo']->incomeSourceType == '3' ? 'selected' : '' }} @endif>Private Sector</option>
                               <option value="4" @if($data['remitterInfo']) {{ $data['remitterInfo']->incomeSourceType == '4' ? 'selected' : '' }} @endif>Business</option>
                               <option value="5" @if($data['remitterInfo']) {{ $data['remitterInfo']->incomeSourceType == '5' ? 'selected' : '' }} @endif>Agriculture</option>
                               <option value="6" @if($data['remitterInfo']) {{ $data['remitterInfo']->incomeSourceType == '6' ? 'selected' : '' }} @endif>Dependent</option>
-                            </select>
-                          </div>
+                                </select>
+                            </div>
                         </div>
-                        <div class="col-sm-6 col-md-6">
-                          <div class="mb-3">
-                            <label class="form-label">Annual Income</label>
-                            <select class="form-select field-disable" id="annualIncome" name="annualIncome" data-validetta="required"  @if(!$data['isEditable']) disabled @endif>
-                              <option value=""  @if($data['remitterInfo']) {{ !$data['remitterInfo']->annualIncome ? 'selected' : '' }} @endif>Select Annual Income</option>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Annual Income</label>
+                                <select class="form-select field-disable" id="annualIncome" name="annualIncome" data-validetta="required" @if(!$data['isEditable']) disabled @endif>
+                                <option value=""  @if($data['remitterInfo']) {{ !$data['remitterInfo']->annualIncome ? 'selected' : '' }} @endif>Select Annual Income</option>
                               <option value="1" @if($data['remitterInfo']) {{ $data['remitterInfo']->annualIncome=='1' ? 'selected' : '' }} @endif>Rs. 0.00 lacs to Rs. 2.00 Lacs</option>
                               <option value="2" @if($data['remitterInfo']) {{ $data['remitterInfo']->annualIncome=='2' ? 'selected' : '' }} @endif>Rs. 2.00 Lacs to Rs. 5 Lacs</option>
                               <option value="3" @if($data['remitterInfo']) {{ $data['remitterInfo']->annualIncome=='3' ? 'selected' : '' }} @endif>Rs. 5 Lacs to Rs. 10 Lacs</option>
                               <option value="4" @if($data['remitterInfo']) {{ $data['remitterInfo']->annualIncome=='4' ? 'selected' : '' }} @endif>More than Rs. 10 Lacs</option>
-                            </select>
-                          </div>
+                                </select>
+                            </div>
                         </div>
+                        <!-- End Remitter Type, Income Source, Income Source Type, and Annual Income column -->
 
-                      </div>
                     </div>
-                    <div class="card-footer text-end"  id="savediv" name="savediv">
-                      <button type="submit" id="savebtn" name="savebtn" class="btn btn-primary" @if(!$data['isEditable']) disabled @endif>Save</button>
-                    </div>
-                  </form>
                 </div>
-                <div>  <!---dispaly none dive close--->
 
-              </div>
-            </div>
+                <div class="card-footer text-end" id="savediv" name="savediv">
+                    <button type="submit" id="savebtn" name="savebtn" class="btn btn-primary" @if(!$data['isEditable']) disabled @endif>Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
             <!--- Div Regarding regisration close-->
                        @if($data['remitterInfo'])
                        @if($data['remitterInfo']->status=='registered' || $data['remitterInfo']->status=='rbl_pending')
@@ -239,11 +258,18 @@
                     <input type="hidden" class="form-control" id="referencekey" name="referencekey" value="{{ isset($data['remitterInfo']->referenceKey ) ? $data['remitterInfo']->referenceKey  : ''}}" >  
                  
                   </div>
-                    <p class="empty-title">Initiate the EKYC</p>
+                    <p class="empty-title"> Hello! Here's how to complete your EKYC with us:</p>
                     <p class="empty-subtitle text-muted">
-                      Remitter Initiatl EKYC
-                    </p>
+                       
+                     <b>1. Start the Process:</b> By clicking the link below, you can initiate the EKYC process.</br>
+
+                     <b>2. Verify Your Identity:</b> Follow the instructions to provide your Aadhaar number and complete the verification process using RBL UIDAI.</br>
+
+                     <b>3. Confirmation:</b> Once you're done, we'll let you know if your verification was successful.</br>
+
+                     <b>4. Status Update:</b> If everything checks out, your status will be updated to 'verified,' and you'll proceed to the biometric verification screen. If not, you'll need to click the button again and complete the RBL UIDAI verification. We'll then guide you on what to do next.</p>
                     <div class="empty-action">
+                      
                     <button type="submit" class="btn btn-primary" id="initiate_ekyc_btn" name="initiate_ekyc_btn">
                         <!-- Download SVG icon from http://tabler-icons.io/i/search -->
                         <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"></path><path d="M21 21l-6 -6"></path></svg>
@@ -359,6 +385,7 @@
                 </div>
               </div>
             </div>
+          </div>
             <!--end-->
               @endif
 
@@ -437,10 +464,22 @@
           </div>
         </div>
       </div>
-      <script>
-       
-  $(document).ready(function($) {
 
+  
+<script>
+    $(document).ready(function() {
+      
+        var hideButton = localStorage.getItem('hideInitiateEKYCBtn');
+        if (hideButton === 'true') {
+            $('#initiate_ekyc_btn').hide();
+            localStorage.removeItem('hideInitiateEKYCBtn');
+        }
+    });
+</script>
+<script>
+  $(document).ready(function($) {
+    //$('#savebtn').hide();
+    $('#savediv').hide();
     $.getScript("{{ asset('public/mytheme/comutils/js/darklightthemecolors.js') }}", function() {
                 });
                 
@@ -460,6 +499,8 @@
 
             $("#state").on('change', function() {
                 var statecode = $(this).val();  
+                $("#districtspin,#statespin,#cityspin").addClass('fa fa-circle-o-notch fa-spin');
+                $('#state,#district,#city').hide();
                 $.ajax({
                               url: "{{route('getDistrict')}}",
                               headers: {
@@ -483,7 +524,9 @@
                                     }else{
                                         // webToast.Danger({ status: 'Failed', message: data.message, delay: 3000, align: 'bottomright' });
                                     }
-                                
+                                   // $("#state").removeClass("btn-loading");
+                                   $('#state,#district,#city').show();
+                                    $("#districtspin,#statespin,#cityspin").removeClass('fa fa-circle-o-notch fa-spin');
                             })
                             .fail(function (jqXHR, textStatus) {
                                 if(jqXHR.responseJSON.message != undefined && jqXHR.status ==400) {
@@ -492,10 +535,15 @@
                                       var msg="Something went wrong ("+ jqXHR.status +")";
                                   }
                                   webToast.Danger({ status: 'Failed', message: msg, delay: 3000, align: 'bottomright' });
-                            })
+                                  //$("#state").removeClass("btn-loading");
+                                  $('#state,#district,#city').show();
+                                  $("#districtspin,#statespin,#cityspin").removeClass('fa fa-circle-o-notch fa-spin');
+                                })
                             
                             .always( function( result ){ 
-                              $("#state").removeClass("btn-loading");
+                             // $("#state").removeClass("btn-loading");
+                             $('#state,#district,#city').show();
+                             $("#districtspin,#statespin,#cityspin").removeClass('fa fa-circle-o-notch fa-spin');
                           });
 
             });
@@ -607,7 +655,7 @@
 
         $("#initiate_ekyc_btn").click(function(){
            var remitterId = document.getElementById("remitterId").value;
-            $("#ekyc_btn").addClass('btn-loading');
+            $("#initiate_ekyc_btn").addClass('btn-loading');
             $.ajax({
               type: 'POST', // The HTTP method to use
               url: '{{ route('remitterEkycInitiate') }}', // The URL of the controller action to call
@@ -626,14 +674,16 @@
                      $('#bio_referencekey').val($.trim(data.data.referenceKey));
                      $('#bio_remId').val(remitterId);
                     $('#initiateekycCard').hide();
-                    $('#initiate_ekyc_btn').prop('disabled', true);
                     $('#check_rbl_ekyc_btn').show();
                                        
                       webToast.Success({ status: 'Success', message: data.message, delay: 3000, align: 'bottomright' });
-                      window.location.href = "{{ route('instantPayRemitterRegister') }}";
+                      //window.location.href = "{{ route('instantPayRemitterRegister') }}";
                   if (data.data && data.data.url) {
                         window.open(data.data.url, '_blank');
                           }
+                          $('#initiate_ekyc_btn').hide();
+                    localStorage.setItem('hideInitiateEKYCBtn', 'true'); // Set flag to hide button
+                    location.reload(); // Refresh the page
                     }
                   }else if(data.act == "RETRY"){
                     
@@ -657,9 +707,10 @@
         });
 
         $("#check_rbl_ekyc_btn").click(function(){
+          
             var remId = $("#remitterId").val(); 
             var referencekey = $("#referencekey").val();
-            
+            $("#check_rbl_ekyc_btn").addClass('btn-loading');
             $.ajax({
                 type: 'POST',
                 url: '{{ route('remitterEkycInitiateStatus') }}',
@@ -679,9 +730,11 @@
                         webToast.Success({ status: 'Success', message: data.message, delay: 3000, align: 'bottomright' });
                         window.location.href = "{{ route('instantPayRemitterRegister') }}";
                     } else if(data.act == "RETRY"){
+                      $('#initiate_ekyc_btn').show();
                         $("#check_rbl_ekyc_btn").removeClass('btn-loading');
                         webToast.Danger({ status: 'Failed', message: data.message, delay: 3000, align: 'bottomright' });
                     } else {
+                      $('#initiate_ekyc_btn').show();
                         webToast.Danger({ status: 'Failed', message: data.message, delay: 3000, align: 'bottomright' });
                     }
                 },

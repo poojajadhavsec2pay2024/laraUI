@@ -3,6 +3,8 @@
 @section('main-container')
 <link href="{{url('frontend/dist/css/webToast.min.css')}}" rel="stylesheet"/>
 <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet"> 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
 <link href="{{url('frontend/dist/css/validetta.min.css')}}" rel="stylesheet" />
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
@@ -63,6 +65,8 @@
         .form-select {
           width: 108%;
         }
+      
+    
 
     </style>
    
@@ -184,7 +188,7 @@
 
 
                         <!--Datatable-->
-                        <div class="page-body" id="beneficiary_details">
+                        <div class="page-body" id="beneficiary_details" >
               <div class="container-xl">
                 <div class="row row-deck row-cards">
                   <div class="col-12">
@@ -308,17 +312,21 @@
                        <div class="row mt-3">
                            <div class="form-group col-6">
                               <div class="">
-                              <label class="form-label required text-muted">State</label>
+                              <label class="form-label required text-muted">State <i id="statespin" class="" style="font-size:24px,"></i></label>
+                              
                               <select class="form-select field-disable" id="state" name="state" data-validetta="required" >
+                              
                             <option value="">Select State</option>
                             @foreach ($data['statedata'] as $statevalue)
                             <option value="{{$statevalue->state}}">{{$statevalue->state}}</option>
                                     @endforeach
                             </select>
-                              </div>
+                           
+                              </div> 
+                             
                           </div>
                           <div class="form-group col-6">
-                          <label class="form-label required text-muted">District</label>
+                          <label class="form-label required text-muted">District <i id="districtspin" class="" style="font-size:24px,"></i></label>
                             <select class="form-select field-disable" id="district" name="district" data-validetta="required"  >
                               <option value="">Select District</option>
                               <option value=""></option>
@@ -339,7 +347,7 @@
                           </div>
                           <div class="form-group col-6">
                             
-                            <label class="form-label required text-muted">Bank Name</label>
+                            <label class="form-label required text-muted">Bank Name <i id="bankspin" class="" style="font-size:24px,"></i></label>
                             <select class="form-select field-disable" id="bankBranchId" name="bankBranchId" data-validetta="required" style="width: 117%;" >
                               <option value="">Select Bank Name</option>
                               <option value=""></option>
@@ -491,8 +499,12 @@
                                        <path d="M9 11h6"></path>
                                     </svg>                               
                                     </span>
-                                    <input id="transferAmount" type="number"  name="transferAmount" autocomplete="off" placeholder="Amount" onkeypress="return addAmount(event,this.id)" class="form-control field-disable" data-vd-message-required="Please enter amount">
-                               </div>
+                                   
+                                    <input id="transferAmount" type="text"  name="transferAmount" autocomplete="off" placeholder="Amount" onkeyup="transferAmountAjaxCall(event)" class="form-control field-disable" data-vd-message-required="Please enter amount">
+                                    <span class="input-group-text">
+                                    <div class="text-secondary" role="status" id="trans_amountdiv"></div>
+                                </span>
+                                  </div>
                                <div class="row mb-3" style="display:none" id="servicecharge"> 
                                     <div class="d-flex p-0">
                                        <div class="form-selectgroup-label d-flex align-items-center p-3">
@@ -571,26 +583,26 @@
                 <div class="col">
                   <div class="row g-2">
                     <div class="col">
-                      <input type="text" class="form-control form-control-lg text-center py-3" maxlength="1" inputmode="numeric" pattern="[0-9]*" data-code-input="">
+                      <input type="text"  name="otp1" class="form-control form-control-lg text-center py-3" maxlength="1" inputmode="numeric" id="ist" onkeyup="clickEvent(this,'sec','ist')" pattern="[0-9]*" data-code-input="">
                     </div>
                     <div class="col">
-                      <input type="text" class="form-control form-control-lg text-center py-3" maxlength="1" inputmode="numeric" pattern="[0-9]*" data-code-input="">
+                      <input type="text"  name="otp2" class="form-control form-control-lg text-center py-3" maxlength="1" inputmode="numeric"  id="sec" onkeyup="clickEvent(this,'third','ist')" pattern="[0-9]*" data-code-input="">
                     </div>
                     <div class="col">
-                      <input type="text" class="form-control form-control-lg text-center py-3" maxlength="1" inputmode="numeric" pattern="[0-9]*" data-code-input="">
+                      <input type="text"  name="otp3" class="form-control form-control-lg text-center py-3" maxlength="1" inputmode="numeric"  id="third" onkeyup="clickEvent(this,'fourth','sec')" pattern="[0-9]*" data-code-input="">
                     </div>
                   </div>
                 </div>
                 <div class="col">
                   <div class="row g-2">
                     <div class="col">
-                      <input type="text" class="form-control form-control-lg text-center py-3" maxlength="1" inputmode="numeric" pattern="[0-9]*" data-code-input="">
+                      <input type="text"  name="otp4" class="form-control form-control-lg text-center py-3" maxlength="1" inputmode="numeric" id="fourth" onkeyup="clickEvent(this,'fifth','third')" pattern="[0-9]*" data-code-input="">
                     </div>
                     <div class="col">
-                      <input type="text" class="form-control form-control-lg text-center py-3" maxlength="1" inputmode="numeric" pattern="[0-9]*" data-code-input="">
+                      <input type="text"  name="otp5" class="form-control form-control-lg text-center py-3" maxlength="1" inputmode="numeric" id="fifth" onkeyup="clickEvent(this,'sixth','fourth')" pattern="[0-9]*" data-code-input="">
                     </div>
                     <div class="col">
-                      <input type="text" class="form-control form-control-lg text-center py-3" maxlength="1" inputmode="numeric" pattern="[0-9]*" data-code-input="">
+                      <input type="text"  name="otp6" class="form-control form-control-lg text-center py-3" maxlength="1" inputmode="numeric" id="sixth" onkeyup="clickEvent(this,'ist','fifth')" pattern="[0-9]*" data-code-input="">
                     </div>
                   </div>
                 </div>
@@ -919,22 +931,21 @@
       $(document).ready(function($) {    
             $('#sender_details').hide();
             $('#beneficiary_details').hide();
-            
             var inputs = $('input[data-code-input]');
 
-            // Add event listener for input on these fields
-            inputs.on('input', function() {
-                var $this = $(this);
-                var maxLength = $this.attr('maxlength');
-                var length = $this.val().length;
+              // Add event listener for input on these fields
+              inputs.on('input', function() {
+                  var $this = $(this);
+                  var maxLength = $this.attr('maxlength');
+                  var length = $this.val().length;
 
-                // If the current input is filled and the next input exists, move cursor to it
-                if (length === maxLength && $this.next('input').length) {
-                    var nextInput = $this.next('input');
-                    nextInput.focus();
-                    nextInput.select(); // Select the text inside the input
-                }
-            });
+                  // If the current input is filled and the next input exists and is not disabled, move cursor to it
+                  if (length === maxLength && $this.next('input').length && !$this.next('input').is(':disabled')) {
+                      var nextInput = $this.next('input');
+                      nextInput.focus();
+                      nextInput.select(); // Select the text inside the input
+                  }
+              });
             //Check if mobile number is registered. 
             $('#dmtmobile').validetta({
                 realTime: true,
@@ -1190,6 +1201,8 @@
                 var state = $("#state").val();
                 var district = $("#district").val();
                 var paymentMode = $("#paymentMode").val();
+                $("#districtspin,#statespin,#bankspin").addClass('fa fa-circle-o-notch fa-spin');
+                $('#state,#district,#bankBranchId,#paymentMode').hide();
                 if(paymentMode=='Cash Payment'){
                         $("#conf_accountnodiv").hide();
                         $("#accountnodiv").hide();
@@ -1219,18 +1232,26 @@
                         $("#bankBranchId").html(items);
                        
                     }
+                    $("#districtspin,#statespin,#bankspin").removeClass('fa fa-circle-o-notch fa-spin');
+                $('#state,#district,#bankBranchId, #paymentMode').show();
                 })
                 .fail(function(jqXHR, textStatus) {
                     var msg = (jqXHR.responseJSON.message != undefined && jqXHR.status == 400) ? jqXHR.responseJSON.message : "Something went wrong (" + jqXHR.status + ")";
                     //webToast.Danger({ status: 'Failed', message: msg, delay: 3000, align: 'bottomright' });
+                  
+                    $("#districtspin,#statespin,#bankspin").removeClass('fa fa-circle-o-notch fa-spin');
+                $('#state,#district,#bankBranchId, #paymentMode').show();
                 })
                 .always(function(result) {
-                    $("#state").removeClass("btn-loading");
+                  $("#districtspin,#statespin,#bankspin").removeClass('fa fa-circle-o-notch fa-spin');
+                $('#state,#district,#bankBranchId, #paymentMode').show();
                 });
         }
        
         $("#state").on('change', function() {
                 var state = $(this).val();
+                $("#districtspin,#statespin").addClass('fa fa-circle-o-notch fa-spin');
+                $('#state,#district').hide();
                 $.ajax({
                     url: "{{route('getNepalDistrict')}}",
                     headers: {
@@ -1250,14 +1271,19 @@
                         });
                         $("#district").html(items);
                         fetchPaymentLocationList(); // Call fetchPaymentLocationList after district is populated
+                        $("#districtspin,#statespin").removeClass('fa fa-circle-o-notch fa-spin');
+                $('#state,#district').show();
                     }
                 })
                 .fail(function(jqXHR, textStatus) {
                     var msg = (jqXHR.responseJSON.message != undefined && jqXHR.status == 400) ? jqXHR.responseJSON.message : "Something went wrong (" + jqXHR.status + ")";
                     webToast.Danger({ status: 'Failed', message: msg, delay: 3000, align: 'bottomright' });
+                    $("#districtspin,#statespin").removeClass('fa fa-circle-o-notch fa-spin');
+                $('#state,#district').show();
                 })
                 .always(function(result) {
-                    $("#state").removeClass("btn-loading");
+                  $("#districtspin,#statespin").removeClass('fa fa-circle-o-notch fa-spin');
+                $('#state,#district').show();
                 });
         });
 
@@ -1455,15 +1481,20 @@
                         
             
         }
-       
-        $("#transferAmount").on('input', function() {
+      
+      function transferAmountAjaxCall(event)  {
+                var transferAmount = event.target.value;
+                if (transferAmount < 100) {
                   
+                  return;
+              } 
+                    $("#trans_amountdiv").addClass('spinner-border spinner-border-sm');
                     var paymentMode = $('#receiver_paymentMode').val();
                     var bankBranchId = $('#rec_bankBranchId').val();
                     var payoutAmount = $('#payoutAmount').val();
                     var transferAmount2 = $('#transferAmount').val();  
                     var country = 'Nepal';
-                 
+                   
                     $.ajax({
                         type: 'POST', // The HTTP method to use
                         url: '{{ route('serviceCharge') }}', // The URL of the controller action to call
@@ -1493,6 +1524,8 @@
                             } else {
                                 webToast.Danger({ status: 'Failed', message: data.message, delay: 3000, align: 'bottomright' });
                             }
+                            $("#trans_amountdiv").removeClass('spinner-border spinner-border-sm');
+                           
                         },
                         error: function(jqXHR, textStatus, errorThrown) {
                             if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
@@ -1501,10 +1534,11 @@
                                 var msg = "Something went wrong (" + jqXHR.status + ")";
                             }
                             webToast.Danger({ status: 'Failed', message: msg, delay: 3000, align: 'bottomright' });
-                            $("#mobilebtn").removeClass('btn-loading');
+                            $("#trans_amountdiv").removeClass('spinner-border spinner-border-sm');
+
                         }
                     });
-                });
+                }
                  $("#mobilebtn").click(function(){
                     var mobile = $('#mobile').val();
                     var operation = $('#operation').val();
@@ -1559,7 +1593,14 @@
                     });
                 });
 
-       
+                function clickEvent(first,last,previous){
+      if(first.value.length){
+        document.getElementById(last).focus();
+      }
+      if(first.value.length==0) {
+       document.getElementById(previous).focus();
+      }
+    }
             //datatable send money  button click
             $('#send-money').validetta({
               realTime: true,
@@ -1694,9 +1735,9 @@
                             $("#invc_ben_acc").text(data.data.beneficiaryAccount);
                             $("#invc_ben_ifsc").text(data.data.beneficiaryBranchId);
                             
-                            var totalamount = parseInt(data.data.pool.openingBal, 10); 
+                            var totalamount = parseInt(data.data.txnValue, 10); 
                             var totalcharges = parseInt(data.data.exchangeRate, 10);
-                                var txnamount = parseFloat(data.data.pool.openingBal);
+                                var txnamount = parseFloat(data.data.txnValue);
                             
                             $("#inv_total_amount").text(txnamount);
                             $("#inv_total_charges").text(data.data.totalcharges);
