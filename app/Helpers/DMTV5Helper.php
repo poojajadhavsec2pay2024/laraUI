@@ -610,7 +610,7 @@ class DMTV5Helper {
         elseif($jsonD->statuscode=="RNF") 
         { 
             $output['status'] = "success";
-            $output['apistatus']='NOT_REGISTERED1';
+            $output['apistatus']='NOT_REGISTERED';
             $output['message']="Remitter Fetch Data Failed";
             $output['apiremark']= isset($jsonD->status) ? $jsonD->status : "NA";
             $output['data'] =isset($jsonD->data) ? $jsonD->data : [];
@@ -702,7 +702,7 @@ class DMTV5Helper {
         { 
             $output['status'] = "success";
             $output['apistatus']='OTP_SEND_FAILED';
-            $output['message']= "Could not send OTP.";
+            $output['message']= "Could not send OTP to remitter mobile number.";
             $output['apiremark']= isset($jsonD->status) ? $jsonD->status : "NA";
             $output['data'] =isset($jsonD->data) ? $jsonD->data : [];
 
@@ -794,7 +794,7 @@ class DMTV5Helper {
         }
         else if ($jsonD->statuscode=='TUP')   
         { 
-            $output['status'] = "suceess";
+            $output['status'] = "success";
             $output['apistatus']='REGISTRATION_INPROCESS';
             $output['message']= "Remitter registration is pending";
             $output['apiremark']= isset($jsonD->status) ? $jsonD->status : "NA";
@@ -804,9 +804,9 @@ class DMTV5Helper {
         //"IVC" => "Invalid Verification Code or OTP",
         else if (in_array($jsonD->statuscode, ['IVC','ERR','RPI']))   
         { 
-            $output['status'] = "suceess";
+            $output['status'] = "success";
             $output['apistatus']='REGISTRATION_INVALID_INPUT';
-            $output['message']= "The selected operation is invalid.";
+            $output['message']= "Remitter registration failed due to invalid Input";
             $output['apiremark']= isset($jsonD->status) ? $jsonD->status : "NA";
             $output['data'] =isset($jsonD->data) ? $jsonD->data : [];
 
@@ -961,7 +961,7 @@ class DMTV5Helper {
         { 
             $output['status'] = "success";
             $output['apistatus']='REMITTER_EKYC_FAILED';
-            $output['message']= "Remitter Ekyc Failed ";
+            $output['message']= "Remitter Ekyc Failed Due To Varification pending";
             $output['apiremark']= isset($jsonD->status) ? $jsonD->status : "NA";
             $output['data'] =isset($jsonD->data) ? $jsonD->data : [];
 

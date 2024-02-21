@@ -499,8 +499,8 @@
 
             $("#state").on('change', function() {
                 var statecode = $(this).val();  
-                $("#districtspin,#statespin,#cityspin").addClass('fa fa-circle-o-notch fa-spin');
-                $('#state,#district,#city').hide();
+                $("#districtspin").addClass('fa fa-circle-o-notch fa-spin');
+                //$('#state,#district,#city').hide();
                 $.ajax({
                               url: "{{route('getDistrict')}}",
                               headers: {
@@ -525,8 +525,8 @@
                                         // webToast.Danger({ status: 'Failed', message: data.message, delay: 3000, align: 'bottomright' });
                                     }
                                    // $("#state").removeClass("btn-loading");
-                                   $('#state,#district,#city').show();
-                                    $("#districtspin,#statespin,#cityspin").removeClass('fa fa-circle-o-notch fa-spin');
+                                   //$('#state,#district,#city').show();
+                                    $("#districtspin").removeClass('fa fa-circle-o-notch fa-spin');
                             })
                             .fail(function (jqXHR, textStatus) {
                                 if(jqXHR.responseJSON.message != undefined && jqXHR.status ==400) {
@@ -536,8 +536,8 @@
                                   }
                                   webToast.Danger({ status: 'Failed', message: msg, delay: 3000, align: 'bottomright' });
                                   //$("#state").removeClass("btn-loading");
-                                  $('#state,#district,#city').show();
-                                  $("#districtspin,#statespin,#cityspin").removeClass('fa fa-circle-o-notch fa-spin');
+                                 // $('#state,#district,#city').show();
+                                  $("#districtspin").removeClass('fa fa-circle-o-notch fa-spin');
                                 })
                             
                             .always( function( result ){ 

@@ -225,6 +225,9 @@
                         <a class="dropdown-item" href="{{url('/instantpaydmt')}}">
                           Instant Pay DMT
                         </a>
+                        <a class="dropdown-item" href="{{url('/viewhistory')}}">
+                          View History
+                        </a>
                         <a class="dropdown-item" href="{{url('/getCustomerProfile')}}">
                           Empty page
                         </a>

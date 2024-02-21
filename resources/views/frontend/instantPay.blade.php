@@ -500,7 +500,7 @@
                                     </svg>                               
                                     </span>
                                    
-                                    <input id="transferAmount" type="text"  name="transferAmount" autocomplete="off" placeholder="Amount" onkeyup="transferAmountAjaxCall(event)" class="form-control field-disable" data-vd-message-required="Please enter amount">
+                                    <input id="transferAmount" type="text"  name="transferAmount" autocomplete="off" data-validetta="required" placeholder="Amount" onkeyup="transferAmountAjaxCall(event)" class="form-control field-disable" data-vd-message-required="Please enter amount" >
                                     <span class="input-group-text">
                                     <div class="text-secondary" role="status" id="trans_amountdiv"></div>
                                 </span>
@@ -583,26 +583,26 @@
                 <div class="col">
                   <div class="row g-2">
                     <div class="col">
-                      <input type="text"  name="otp1" class="form-control form-control-lg text-center py-3" maxlength="1" inputmode="numeric" id="ist" onkeyup="clickEvent(this,'sec','ist')" pattern="[0-9]*" data-code-input="">
+                      <input type="text"  data-validetta="required" name="otp1" class="form-control form-control-lg text-center py-3" maxlength="1" inputmode="numeric" id="ist" onkeyup="clickEvent(this,'sec','ist')" pattern="[0-9]*" data-code-input="">
                     </div>
                     <div class="col">
-                      <input type="text"  name="otp2" class="form-control form-control-lg text-center py-3" maxlength="1" inputmode="numeric"  id="sec" onkeyup="clickEvent(this,'third','ist')" pattern="[0-9]*" data-code-input="">
+                      <input type="text"  data-validetta="required" name="otp2" class="form-control form-control-lg text-center py-3" maxlength="1" inputmode="numeric"  id="sec" onkeyup="clickEvent(this,'third','ist')" pattern="[0-9]*" data-code-input="">
                     </div>
                     <div class="col">
-                      <input type="text"  name="otp3" class="form-control form-control-lg text-center py-3" maxlength="1" inputmode="numeric"  id="third" onkeyup="clickEvent(this,'fourth','sec')" pattern="[0-9]*" data-code-input="">
+                      <input type="text"  data-validetta="required" name="otp3" class="form-control form-control-lg text-center py-3" maxlength="1" inputmode="numeric"  id="third" onkeyup="clickEvent(this,'fourth','sec')" pattern="[0-9]*" data-code-input="">
                     </div>
                   </div>
                 </div>
                 <div class="col">
                   <div class="row g-2">
                     <div class="col">
-                      <input type="text"  name="otp4" class="form-control form-control-lg text-center py-3" maxlength="1" inputmode="numeric" id="fourth" onkeyup="clickEvent(this,'fifth','third')" pattern="[0-9]*" data-code-input="">
+                      <input type="text"  data-validetta="required" name="otp4" class="form-control form-control-lg text-center py-3" maxlength="1" inputmode="numeric" id="fourth" onkeyup="clickEvent(this,'fifth','third')" pattern="[0-9]*" data-code-input="">
                     </div>
                     <div class="col">
-                      <input type="text"  name="otp5" class="form-control form-control-lg text-center py-3" maxlength="1" inputmode="numeric" id="fifth" onkeyup="clickEvent(this,'sixth','fourth')" pattern="[0-9]*" data-code-input="">
+                      <input type="text"  data-validetta="required" name="otp5" class="form-control form-control-lg text-center py-3" maxlength="1" inputmode="numeric" id="fifth" onkeyup="clickEvent(this,'sixth','fourth')" pattern="[0-9]*" data-code-input="">
                     </div>
                     <div class="col">
-                      <input type="text"  name="otp6" class="form-control form-control-lg text-center py-3" maxlength="1" inputmode="numeric" id="sixth" onkeyup="clickEvent(this,'ist','fifth')" pattern="[0-9]*" data-code-input="">
+                      <input type="text"  data-validetta="required" name="otp6" class="form-control form-control-lg text-center py-3" maxlength="1" inputmode="numeric" id="sixth" onkeyup="clickEvent(this,'ist','fifth')" pattern="[0-9]*" data-code-input="">
                     </div>
                   </div>
                 </div>
@@ -970,10 +970,10 @@
                       if(data.act == "CONTINUE"){
                         
                           if(data.apistatus == "REGISTERED"){
-                            if(data.message == "Unable to fetch beneficiaries, please try again"){
-                                webToast.Info({ status: 'Error !', message: data.message, delay: 3000, align: 'bottomright' });
+                            if(data.data.message == "Unable to fetch beneficiaries, please try again"){
+                                webToast.Info({ status: 'Error !', message: data.message + data.apiremark, delay: 3000, align: 'bottomright' });
                             }else{
-                                webToast.Success({ status: 'Success!', message: data.message, delay: 3000, align: 'bottomright' });
+                                webToast.Success({ status: 'Success!', message: data.message + data.apiremark, delay: 3000, align: 'bottomright' });
                             }
                               
                             
@@ -1044,7 +1044,7 @@
                           }else if(data.apistatus == "NOT_REGISTERED"){
                             var mobileno = $("#mobile").val();
                               $('#btn-getDetails').removeClass('btn-loading');
-                                webToast.Info({ status: 'Failed !', message: data.message, delay: 3000, align: 'bottomright'  });
+                                webToast.Info({ status: 'Failed !', message: data.message + data.apiremark, delay: 3000, align: 'bottomright'  });
                                 var form = $('<form>', {
                                     'method': 'POST',
                                     'action': '{{ route('instantPayRemitterRegister')}}'
@@ -1085,10 +1085,10 @@
                               $('#offcanvasEnd').offcanvas('show');
                           }
                       }else if(data.act == "RETRY"){
-                          webToast.Danger({ status: 'Failed !', message: data.message, delay: 3000, align: 'bottomright'  });
+                          webToast.Danger({ status: 'Failed !', message: data.message + data.apiremark, delay: 3000, align: 'bottomright'  });
                           $('#btn-getDetails').removeClass('btn-loading');
                       }else {
-                          webToast.Danger({ status: 'Failed !', message: data.message, delay: 3000, align: 'bottomright'  });
+                          webToast.Danger({ status: 'Failed !', message: data.message + data.apiremark, delay: 3000, align: 'bottomright'  });
                           $('#btn-getDetails').removeClass('btn-loading');
                               $('.field-disable').removeAttr('readonly').val('');
                           $('#offcanvasEnd .closeOffCanvas').click();
@@ -1201,8 +1201,8 @@
                 var state = $("#state").val();
                 var district = $("#district").val();
                 var paymentMode = $("#paymentMode").val();
-                $("#districtspin,#statespin,#bankspin").addClass('fa fa-circle-o-notch fa-spin');
-                $('#state,#district,#bankBranchId,#paymentMode').hide();
+                $("#bankspin").addClass('fa fa-circle-o-notch fa-spin');
+                //$('#state,#district,#bankBranchId,#paymentMode').hide();
                 if(paymentMode=='Cash Payment'){
                         $("#conf_accountnodiv").hide();
                         $("#accountnodiv").hide();
@@ -1232,26 +1232,26 @@
                         $("#bankBranchId").html(items);
                        
                     }
-                    $("#districtspin,#statespin,#bankspin").removeClass('fa fa-circle-o-notch fa-spin');
-                $('#state,#district,#bankBranchId, #paymentMode').show();
+                    $("#bankspin").removeClass('fa fa-circle-o-notch fa-spin');
+                //$('#state,#district,#bankBranchId, #paymentMode').show();
                 })
                 .fail(function(jqXHR, textStatus) {
                     var msg = (jqXHR.responseJSON.message != undefined && jqXHR.status == 400) ? jqXHR.responseJSON.message : "Something went wrong (" + jqXHR.status + ")";
                     //webToast.Danger({ status: 'Failed', message: msg, delay: 3000, align: 'bottomright' });
                   
-                    $("#districtspin,#statespin,#bankspin").removeClass('fa fa-circle-o-notch fa-spin');
-                $('#state,#district,#bankBranchId, #paymentMode').show();
+                    $("#bankspin").removeClass('fa fa-circle-o-notch fa-spin');
+                //$('#state,#district,#bankBranchId, #paymentMode').show();
                 })
                 .always(function(result) {
-                  $("#districtspin,#statespin,#bankspin").removeClass('fa fa-circle-o-notch fa-spin');
-                $('#state,#district,#bankBranchId, #paymentMode').show();
+                  $("#bankspin").removeClass('fa fa-circle-o-notch fa-spin');
+                //$('#state,#district,#bankBranchId, #paymentMode').show();
                 });
         }
        
         $("#state").on('change', function() {
                 var state = $(this).val();
-                $("#districtspin,#statespin").addClass('fa fa-circle-o-notch fa-spin');
-                $('#state,#district').hide();
+                $("#districtspin").addClass('fa fa-circle-o-notch fa-spin');
+               // $('#state,#district').hide();
                 $.ajax({
                     url: "{{route('getNepalDistrict')}}",
                     headers: {
@@ -1271,19 +1271,19 @@
                         });
                         $("#district").html(items);
                         fetchPaymentLocationList(); // Call fetchPaymentLocationList after district is populated
-                        $("#districtspin,#statespin").removeClass('fa fa-circle-o-notch fa-spin');
-                $('#state,#district').show();
+                        $("#districtspin").removeClass('fa fa-circle-o-notch fa-spin');
+                //$('#state,#district').show();
                     }
                 })
                 .fail(function(jqXHR, textStatus) {
                     var msg = (jqXHR.responseJSON.message != undefined && jqXHR.status == 400) ? jqXHR.responseJSON.message : "Something went wrong (" + jqXHR.status + ")";
                     webToast.Danger({ status: 'Failed', message: msg, delay: 3000, align: 'bottomright' });
-                    $("#districtspin,#statespin").removeClass('fa fa-circle-o-notch fa-spin');
-                $('#state,#district').show();
+                    $("#districtspin").removeClass('fa fa-circle-o-notch fa-spin');
+                //$('#state,#district').show();
                 })
                 .always(function(result) {
-                  $("#districtspin,#statespin").removeClass('fa fa-circle-o-notch fa-spin');
-                $('#state,#district').show();
+                  $("#districtspin").removeClass('fa fa-circle-o-notch fa-spin');
+                //$('#state,#district').show();
                 });
         });
 
@@ -1334,13 +1334,13 @@
                                     setTimeout(function() {
                                         $("#resendbenotp").removeClass('d-none');
                                     }, 5000);
-                                    webToast.Success({ status: 'Success', message: data.otp + data.message, delay: 8000, align: 'bottomright' });
+                                    webToast.Success({ status: 'Success', message: data.otp + data.message + data.apiremark, delay: 8000, align: 'bottomright' });
                                 }
                             
                         }else if(data.act == "TERMINATE"){
-                            webToast.Danger({ status: 'Failed', message: data.message, delay: 3000, align: 'bottomright' });
+                            webToast.Danger({ status: 'Failed', message: data.message + data.apiremark, delay: 3000, align: 'bottomright' });
                         }else{
-                            webToast.Danger({ status: 'Failed', message: data.message, delay: 3000, align: 'bottomright' });
+                            webToast.Danger({ status: 'Failed', message: data.message + data.apiremark, delay: 3000, align: 'bottomright' });
                         }
                         $("#btnGetSubmit").removeClass("disable-button");
                         $("#loadingIcon").addClass("d-none");
@@ -1392,7 +1392,7 @@
                 
                 .done(function (data) {
                     if(data.act == "CONTINUE" && data.apistatus == "BENEFICIARY_REGISTER_SUCCESSFULLY"){
-                        webToast.Success({ status: 'Success !', message: data.message, delay: 3000, align: 'bottomright' });
+                        webToast.Success({ status: 'Success !', message: data.message + data.apiremark, delay: 3000, align: 'bottomright' });
                       $('#btn-addBeneficiary').removeClass('btn-loading');
                       $('.field-disable').removeAttr('readonly').val('');
                       $('#offcanvasEnd .closeOffCanvas').click();
@@ -1401,10 +1401,10 @@
                         
                     }else if(data.act == "RETRY"){
                         if(data.apistatus == "BENEFICIARY_REGISTER_FAILED"){
-                            webToast.Danger({ status: 'Failed !', message: data.message, delay: 3000, align: 'bottomright'  });
+                            webToast.Danger({ status: 'Failed !', message: data.message + data.apiremark, delay: 3000, align: 'bottomright'  });
                             $('#btn-addBeneficiary').removeClass('btn-loading');
                         }else {
-                            webToast.Danger({ status: 'Failed !', message: data.message, delay: 3000, align: 'bottomright'  });
+                            webToast.Danger({ status: 'Failed !', message: data.message + data.apiremark, delay: 3000, align: 'bottomright'  });
                             $('#btn-addBeneficiary').removeClass('btn-loading');
                         }
                         
@@ -1417,7 +1417,7 @@
                         $("#submitotp").val('');
 
                     }else {
-                        webToast.Danger({ status: 'Failed !', message: data.message, delay: 3000, align: 'bottomright'  });
+                        webToast.Danger({ status: 'Failed !', message: data.message + data.apiremark, delay: 3000, align: 'bottomright'  });
                         $('#btn-addBeneficiary').removeClass('btn-loading');
                         $('.field-disable').removeAttr('readonly').val('');
                         $('#offcanvasEnd .closeOffCanvas').click();
@@ -1520,9 +1520,9 @@
                                 
                             } else if (data.act == "RETRY") {
                                 // $("#mobilebtn").removeClass('btn-loading');
-                                webToast.Danger({ status: 'Failed', message: data.message, delay: 3000, align: 'bottomright' });
+                                webToast.Danger({ status: 'Failed', message: data.message + data.apiremark, delay: 3000, align: 'bottomright' });
                             } else {
-                                webToast.Danger({ status: 'Failed', message: data.message, delay: 3000, align: 'bottomright' });
+                                webToast.Danger({ status: 'Failed', message: data.message + data.apiremark, delay: 3000, align: 'bottomright' });
                             }
                             $("#trans_amountdiv").removeClass('spinner-border spinner-border-sm');
                            
@@ -1572,13 +1572,13 @@
                             $('#btn-sendMoney').show();
                             $('#otpReference').val($.trim(data.data.otpReference));
                             $('#mobileno').val(mobile);
-                              webToast.Success({ status: 'Success', message: data.message, delay: 3000, align: 'bottomright' });
+                              webToast.Success({ status: 'Success', message: data.message + data.apiremark, delay: 3000, align: 'bottomright' });
                           }else if(data.act == "RETRY"){
                             
                             $("#mobilebtn").removeClass('btn-loading');
-                              webToast.Danger({ status: 'Failed', message: data.message, delay: 3000, align: 'bottomright' });
+                              webToast.Danger({ status: 'Failed', message: data.message + data.apiremark, delay: 3000, align: 'bottomright' });
                           }else{
-                              webToast.Danger({ status: 'Failed', message: data.message, delay: 3000, align: 'bottomright' });
+                              webToast.Danger({ status: 'Failed', message: data.message + data.apiremark, delay: 3000, align: 'bottomright' });
                           }
                       },
                       error: function (jqXHR, textStatus, errorThrown) {
@@ -1605,7 +1605,7 @@
             $('#send-money').validetta({
               realTime: true,
               display: 'inline',
-              errorTemplateClass: 'validetta-inline w-100',
+              errorTemplateClass: 'validetta-inline',
               onValid: function (event) {
                      $('#btn-sendMoney').addClass('btn-loading');
                      if($('body').hasClass('theme-dark')){
@@ -1653,7 +1653,7 @@
                             $("#modalValue").text(trans_amount); // Set the value in the modal
                           $("#payment-success").modal('show');
                         }else if(data.act == "RETRY" && data.apistatus == "TRANSFER_FAILED"){
-                            webToast.Danger({ status: 'Failed !', message: data.message, delay: 3000, align: 'bottomright'  });
+                            webToast.Danger({ status: 'Failed !', message: data.message + data.apiremark , delay: 3000, align: 'bottomright'  });
                             $('#btn-sendMoney').removeClass('btn-loading');
                             $("#payment-failed").modal('show');
                             $('#offcanvasEnd .closeOffCanvas').click();
@@ -1663,7 +1663,7 @@
                             $("#txnfailedValue").text(trans_amount); // Set the value in the modal
                           //$("#payment-failed").modal('show');
                         }else if(data.act == "TERMINATE" && data.apistatus == "TRANSFER_PENDING"){
-                            webToast.Info({ status: 'Pending !', message: data.message, delay: 3000, align: 'bottomright'  });
+                            webToast.Info({ status: 'Pending !', message: data.message + data.apiremark , delay: 3000, align: 'bottomright'  });
                             $('#btn-sendMoney').removeClass('btn-loading');
                             $('.field-disable').removeAttr('readonly').val('');
                             $('#offcanvasEnd .closeOffCanvas').click();
@@ -1673,7 +1673,7 @@
                             $("#txnpendingValue").text(trans_amount); // Set the value in the modal
                             $("#payment-pending").modal('show');
                         }else {
-                            webToast.Danger({ status: 'Pending !', message: data.message, delay: 3000, align: 'bottomright'  });
+                            webToast.Danger({ status: 'Pending !', message: data.message + data.apiremark + data.apiremark, delay: 3000, align: 'bottomright'  });
                             $('#btn-sendMoney').removeClass('btn-loading');
                             $('.field-disable').removeAttr('readonly').val('');
                             $('#offcanvasEnd .closeOffCanvas').click();

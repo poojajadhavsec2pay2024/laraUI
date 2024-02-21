@@ -10,6 +10,9 @@ use App\models\NepalDtateDistrict;
 use App\models\IndoNepalRemitters;
 use App\models\ReportDmt;
 use App\models\Global_Settings;
+use App\models\User;
+use Carbon\Carbon;
+use Crypt;
 
 class DMTV5Controller extends Controller
 {
@@ -126,17 +129,17 @@ class DMTV5Controller extends Controller
             $output['act'] = "CONTINUE";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
-            $output['message'] = isset($result['apiremark']) ? $result['apiremark'] : "Payment Location List Fetch successfully";
+            $output['message'] = "Payment Location List Fetch successfully";
             $output['data']= $result['data'];
             
             
         }
         else if($result['apistatus'] == 'LOCATION_FETCH_FAILED'){
-            $output['status'] = "failed";
+            $output['status'] = "success";
             $output['act'] = "RETRY";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
-            $output['message'] = isset($result['apiremark']) ? $result['apiremark'] : "Unable to fetch the payment location list";
+            $output['message'] = "Unable to fetch the payment location list";
             $output['data']= $result['data'];
             
         }else {
@@ -200,7 +203,7 @@ class DMTV5Controller extends Controller
             $output['act'] = "CONTINUE";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
-            $output['message'] = isset($result['apiremark']) ? $result['apiremark'] : "Data Fetch Sucessfully";
+            $output['message'] ="Data Fetch Sucessfully";
             $output['data']= $result['data'];
             Session::put('remitter_mobileNumber', $request->mobile);
             Session::put('senderID', $result['data']->id);
@@ -211,7 +214,7 @@ class DMTV5Controller extends Controller
             $output['act'] = "CONTINUE";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
-            $output['message'] = $result['message'];
+            $output['message'] = "Remitter Fetch Data Failed";
             $output['data']= $result['data'];
             Session::put('rem_mobileNo', $request->mobile);
             
@@ -260,7 +263,7 @@ class DMTV5Controller extends Controller
             $output['act'] = "CONTINUE";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
-            $output['message'] = $result['message'];
+            $output['message'] = "OTP sent to remitter mobile number";
             $output['data']= $result['data'];
             
         }
@@ -269,7 +272,7 @@ class DMTV5Controller extends Controller
             $output['act'] = "RETRY";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
-            $output['message'] = $result['message'];
+            $output['message'] = "Could not send OTP to remitter mobile number.";
             $output['data']= $result['data'];
         }else {
             $output['status'] = "failed";
@@ -372,7 +375,7 @@ class DMTV5Controller extends Controller
             $output['act'] = "CONTINUE";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
-            $output['message'] = $result['message'];
+            $output['message'] = "Remitter registration successful";
             $output['data']= $result['data'];
             Session::put('rem_mobileNo', $result['data']->mobile);
             Session::put('senderID', $result['data']->id);
@@ -384,7 +387,7 @@ class DMTV5Controller extends Controller
             $output['act'] = "RETRY";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
-            $output['message'] = $result['message'];
+            $output['message'] = "Remitter registration is pending";
             $output['data']= $result['data'];
         }
         else if($result['apistatus'] == 'REGISTRATION_INVALID_INPUT'){
@@ -431,7 +434,7 @@ class DMTV5Controller extends Controller
             $output['act'] = "CONTINUE";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
-            $output['message'] = $result['message'];
+            $output['message'] = "Remitter Ekyc Initiate Succesfully";
             $output['data']= $result['data'];
             Session::put('referenceKey', $result['data']->referenceKey);
            
@@ -442,7 +445,7 @@ class DMTV5Controller extends Controller
             $output['act'] = "RETRY";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
-            $output['message'] = $result['message'];
+            $output['message'] = "Failed to Initiate Remitter Ekyc please try again";;
             $output['data']= $result['data'];
         }else {
             $output['status'] = "failed";
@@ -466,7 +469,7 @@ class DMTV5Controller extends Controller
         $data["referenceKey"] =$request->referenceKey;
        
         $mockmode = true;
-        $mockmodestatus="FAILED";//FAILED,PENDING
+        $mockmodestatus="SUCCESS";//FAILED,PENDING
         $result = \DmtApiv5::remitterEkycInitiateStatus($data, $mockmode,$mockmodestatus);
        // dd($result);
         if($result['apistatus'] == 'EKYC_SUCCESSFUL'){ 
@@ -489,7 +492,7 @@ class DMTV5Controller extends Controller
             $output['act'] = "RETRY";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
-            $output['message'] = $result['message'];
+            $output['message'] = "Remitter eKYC is under process. Please wait or Do the completion.";
             $output['data']= $result['data'];
         }
         else if($result['apistatus'] == 'REMITTER_EKYC_FAILED'){
@@ -497,7 +500,7 @@ class DMTV5Controller extends Controller
             $output['act'] = "RETRY";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
-            $output['message'] = $result['message'];
+            $output['message'] = "Remitter eKYC failed. Please retry the RBL UIDAI verification again.";
             $output['data']= $result['data'];
         }else {
             $output['status'] = "failed";
@@ -545,17 +548,17 @@ class DMTV5Controller extends Controller
             $output['act'] = "CONTINUE";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
-            $output['message'] = $result['message'];
+            $output['message'] = "Biometric eKYC completed successfully.";
             $output['data']= $result['data'];
             
         }
         else if($result['apistatus'] == 'REMITTER_EKYC_UNDER_PROCESS'){
             
-            $output['status'] = "pending";
+            $output['status'] = "success";
             $output['act'] = "RETRY";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
-            $output['message'] = $result['message'];
+            $output['message'] = "Biometric eKYC is still processing. Please wait.";
             $output['data']= $result['data'];
         }
         else if($result['apistatus'] == 'REMITTER_EKYC_FAILED'){
@@ -563,7 +566,7 @@ class DMTV5Controller extends Controller
             $output['act'] = "RETRY";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
-            $output['message'] = $result['message'];
+            $output['message'] = "Biometric eKYC failed. Please try again.";
             $output['data']= $result['data'];
         }else {
             $output['status'] = "failed";
@@ -624,21 +627,21 @@ class DMTV5Controller extends Controller
         $result = \DmtApiv5::beneficiaryRegistration($data, $mockmode,$mockmodestatus);
        
         if($result['apistatus'] == 'BENEFICIARY_REGISTER_SUCCESSFULLY'){ 
-            $output['status'] = $result['status'];
+            $output['status'] = "success";
             $output['act'] = "CONTINUE";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
-            $output['message'] = $result['message'];
+            $output['message'] = "Beneficiary Added Successfully";
             $output['data']= $result['data'];
             
         }
         else if($result['apistatus'] == 'BENEFICIARY_REGISTER_FAILED'){
             
-            $output['status'] = $result['status'];
+            $output['status'] = "success";
             $output['act'] = "RETRY";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
-            $output['message'] = $result['message'];
+            $output['message'] = "Not able to add the Beneficiary please add valid data";
             $output['data']= $result['data'];
         }
         else {
@@ -664,22 +667,22 @@ class DMTV5Controller extends Controller
         $mockmodestatus="SUCCESS";//FAILED,PENDING
         $result = \DmtApiv5::serviceCharge($data, $mockmode,$mockmodestatus);
         if($result['apistatus'] == 'DATA_FETCHED_SUCCESSFUL'){ 
-            $output['status'] = $result['status'];
+            $output['status'] = "success";
             $output['act'] = "CONTINUE";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
-            $output['message'] = $result['message'];
+            $output['message'] = "Service charge retrieved successfully.";
             $output['data']= $result['data'];
             
         }
        
         else if($result['apistatus'] == 'DATA_FETCHED_FAILED'){
             
-            $output['status'] = $result['status'];
+            $output['status'] = "success";
             $output['act'] = "RETRY";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
-            $output['message'] = $result['message'];
+            $output['message'] = "Unable to Fetch the service Charge";
             $output['data']= $result['data'];
         }
         else {
@@ -755,11 +758,11 @@ class DMTV5Controller extends Controller
             'refno'=>$result['data']->txnReferenceId,
             'refno2'=>$result['data']->poolReferenceId
                  ]);
-            $output['status'] = $result['status'];
+            $output['status'] = "success";
             $output['act'] = "CONTINUE";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
-            $output['message'] = $result['message'];
+            $output['message'] ="Your transaction was successful.";
             if (isset($result['data']->pool)) {
                 unset($result['data']->pool);
             }
@@ -773,11 +776,11 @@ class DMTV5Controller extends Controller
             'refno'=>$result['data']->txnReferenceId,
             'refno2'=>$result['data']->poolReferenceId
                  ]);
-            $output['status'] = $result['status'];
+            $output['status'] = "success";
             $output['act'] = "TERMINATE";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
-            $output['message'] = $result['message'];
+            $output['message'] = "Your transaction is under progress. Please wait.";
             if (isset($result['data']->pool)) {
                  unset($result['data']->pool);
             }
@@ -792,11 +795,11 @@ class DMTV5Controller extends Controller
             'refno'=>$result['data']->txnReferenceId,
             'refno2'=>$result['data']->poolReferenceId
                  ]);
-            $output['status'] = $result['status'];
+            $output['status'] = "success";
             $output['act'] = "RETRY";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
-            $output['message'] = $result['message'];
+            $output['message'] = "Transaction Failed";
             if (isset($result['data']->pool)) {
                 unset($result['data']->pool);
             }
@@ -832,6 +835,77 @@ class DMTV5Controller extends Controller
         $mockmodestatus="PENDING";//FAILED,PENDING
         $result = \DmtApiv5::fetchTransactionStatus($data, $mockmode,$mockmodestatus);
         dd($result);
+    
+    }
+    public function viewHistory(Request $request, $type,$id=0)
+    {
+        if(\Auth::check())
+        {  
+            $user = \Auth::User();
+        ini_set('memory_limit', '-1');
+        // if($id != 0){
+        //     $userid=$id;
+        //     $data['user']=User::where('id',$userid)->first(["name", "id", "role_id","scheme_id", "wl_id","ent_id","dt_id","md_id"]);
+        //     $finalaray["id"] = $userid;
+        // }else{
+        //     $userid=\Auth::id();
+        //     $data['user']=User::where('id',$userid)->first(["name", "id", "role_id","scheme_id", "wl_id","ent_id","dt_id","md_id"]);
+        // }
+               $thdata['id']='ID';
+               $thdata['srno']='Sr.no';
+               $thdata['Date']='Date';
+               $thdata['txnid']='Transaction Id';
+               $thdata['providename']='Provider';
+               $thdata['user']='User';
+               $thdata['amount']='Amount';
+               $thdata['commission']='Profit';
+               $thdata['user_tds']='User Tds';
+               $thdata['refno']='Reference. no';
+               $thdata['status']='Status';
+               $thdata['userid'] = 'User Id';
+               $thdata['name']='Member Details';
+               $thdata['parentname']='Parent Details';
+               $thdata['remark']='Remark';
+           
+               $thdata['statuss']='Status';
+               $thdata['role']='User Role';
+               $currentDate = Carbon::now()->format('Y-m-d');
+               $user=Auth::user();
+               $tddata=array();
+    		   $returnArray=array();
+    		   $finalArray=array();
+               $finalArray['thdata'] = $thdata;
+               if(empty($finalArray['tddata']))
+               {
+                   $finalArray['tddata'] = array();
+               }else{
+                   $finalArray['thdata'] = $thdata;
+               }
+
+            $encryptedData["tddata"] = $finalArray['tddata'];
+            $encryptedData["thdata"] =  $finalArray['thdata'];
+            /*--------Abhishek Complaint Change 140224-START----------*/
+             //$complaintCategories = ComplaintCategory::all(); 
+             $encryptedData["complaintCategories"] = "";  
+             $encryptedData["service"] =  "indonepaldmt"; 
+              /*--------Abhishek Complaint Change 140224--END---------*/
+            if((isset($request->fromdate) && !empty($request->fromdate)) 
+               && (isset($request->todate) && !empty($request->todate))){
+                  $encryptedData["from_date"] =  $request->fromdate;
+                  $encryptedData["to_date"] =  $request->todate;
+                   $encryptedData["status"] =  $request->status;
+               }else{
+                  $encryptedData["from_date"] =  $currentDate;
+                  $encryptedData["to_date"] =  $currentDate;
+                   $encryptedData["status"] =  '';
+               }
+            //return view('frontend.viewhistory');//blank
+            return view('frontend.viewhistory.'.$type)->with($encryptedData);
+        }
+        return redirect()->route('signIn')
+            ->withErrors([
+            'email' => 'Please login to Again.',
+        ])->onlyInput('email');  
     
     }
     public function transcode()
@@ -886,6 +960,7 @@ class DMTV5Controller extends Controller
     public function getDistrict(Request $request)
     {
        // dd($request->statecode);
+       sleep(5);
             $data = IndiaStateDistrict::where('stateCode',$request->statecode)->distinct()->pluck('district');
            // dd($data);
            $output['status']='success';

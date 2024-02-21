@@ -116,7 +116,9 @@ Route::post('/remitterupdate','remitterUpdate')->name('remitterUpdate');
 Route::post('/beneficiaryregistration','beneficiaryRegistration')->name('beneficiaryRegistration');
 Route::post('/servicecharge','serviceCharge')->name('serviceCharge');
 Route::post('/fundtransfer','fundTransfer')->name('fundTransfer');
-Route::get('/fetchtransactionstatus','fetchTransactionStatus')->name('fetchTransactionStatus');
+Route::post('/fetchtransactionstatus','fetchTransactionStatus')->name('fetchTransactionStatus');
 Route::post('/addbeneficiaryotp','addBeneficiaryOtp')->name('addBeneficiaryOtp');
+Route::any('/viewhistory','viewHistory')->name('viewHistory');
+
 });
 
