@@ -9,7 +9,7 @@ use App\Http\Middleware\Authenticate;
 use App\Http\Controllers\DMTV4Controller;
 use App\Http\Controllers\AEPSV2Controller;
 use App\Http\Controllers\DMTV5Controller;
-
+use App\Http\Controllers\TransactionHistoryController;
 
 
 /*
@@ -118,7 +118,10 @@ Route::post('/servicecharge','serviceCharge')->name('serviceCharge');
 Route::post('/fundtransfer','fundTransfer')->name('fundTransfer');
 Route::post('/fetchtransactionstatus','fetchTransactionStatus')->name('fetchTransactionStatus');
 Route::post('/addbeneficiaryotp','addBeneficiaryOtp')->name('addBeneficiaryOtp');
-Route::any('/viewhistory','viewHistory')->name('viewHistory');
+
 
 });
+Route::any('/viewhistory',[TransactionHistoryController::class, 'index'])->name('index');
+Route::any('/report_table_ajax',[TransactionHistoryController::class, 'report_table_ajax'])->name('report_table_ajax');
+
 

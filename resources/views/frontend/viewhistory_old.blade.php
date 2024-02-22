@@ -26,22 +26,22 @@
             </div>
         @endif
         <table class="table table-bordered">
-                    <thead>
-                <tr>
-                    @foreach($selectedColumns as $column)
-                        <th>{{ $customColumnNames[$column] }}</th>
-                    @endforeach
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($reportData as $row)
+                        <thead>
                     <tr>
-                        @foreach($selectedColumns as $column)
-                            <td>{{ $row->$column }}</td>
+                        @foreach($columns as $column)
+                            <th>{{ $column }}</th>
                         @endforeach
                     </tr>
-                @endforeach
-            </tbody>
+                </thead>
+                <tbody>
+                    @foreach($reportData as $row)
+                        <tr>
+                            @foreach($columns as $column => $displayName)
+                                <td>{{ $row->$column }}</td>
+                            @endforeach
+                        </tr>
+                    @endforeach
+                </tbody>
 
         </table>
        

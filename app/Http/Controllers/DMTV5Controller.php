@@ -837,77 +837,7 @@ class DMTV5Controller extends Controller
         dd($result);
     
     }
-    public function viewHistory(Request $request, $type,$id=0)
-    {
-        if(\Auth::check())
-        {  
-            $user = \Auth::User();
-        ini_set('memory_limit', '-1');
-        // if($id != 0){
-        //     $userid=$id;
-        //     $data['user']=User::where('id',$userid)->first(["name", "id", "role_id","scheme_id", "wl_id","ent_id","dt_id","md_id"]);
-        //     $finalaray["id"] = $userid;
-        // }else{
-        //     $userid=\Auth::id();
-        //     $data['user']=User::where('id',$userid)->first(["name", "id", "role_id","scheme_id", "wl_id","ent_id","dt_id","md_id"]);
-        // }
-               $thdata['id']='ID';
-               $thdata['srno']='Sr.no';
-               $thdata['Date']='Date';
-               $thdata['txnid']='Transaction Id';
-               $thdata['providename']='Provider';
-               $thdata['user']='User';
-               $thdata['amount']='Amount';
-               $thdata['commission']='Profit';
-               $thdata['user_tds']='User Tds';
-               $thdata['refno']='Reference. no';
-               $thdata['status']='Status';
-               $thdata['userid'] = 'User Id';
-               $thdata['name']='Member Details';
-               $thdata['parentname']='Parent Details';
-               $thdata['remark']='Remark';
-           
-               $thdata['statuss']='Status';
-               $thdata['role']='User Role';
-               $currentDate = Carbon::now()->format('Y-m-d');
-               $user=Auth::user();
-               $tddata=array();
-    		   $returnArray=array();
-    		   $finalArray=array();
-               $finalArray['thdata'] = $thdata;
-               if(empty($finalArray['tddata']))
-               {
-                   $finalArray['tddata'] = array();
-               }else{
-                   $finalArray['thdata'] = $thdata;
-               }
-
-            $encryptedData["tddata"] = $finalArray['tddata'];
-            $encryptedData["thdata"] =  $finalArray['thdata'];
-            /*--------Abhishek Complaint Change 140224-START----------*/
-             //$complaintCategories = ComplaintCategory::all(); 
-             $encryptedData["complaintCategories"] = "";  
-             $encryptedData["service"] =  "indonepaldmt"; 
-              /*--------Abhishek Complaint Change 140224--END---------*/
-            if((isset($request->fromdate) && !empty($request->fromdate)) 
-               && (isset($request->todate) && !empty($request->todate))){
-                  $encryptedData["from_date"] =  $request->fromdate;
-                  $encryptedData["to_date"] =  $request->todate;
-                   $encryptedData["status"] =  $request->status;
-               }else{
-                  $encryptedData["from_date"] =  $currentDate;
-                  $encryptedData["to_date"] =  $currentDate;
-                   $encryptedData["status"] =  '';
-               }
-            //return view('frontend.viewhistory');//blank
-            return view('frontend.viewhistory.'.$type)->with($encryptedData);
-        }
-        return redirect()->route('signIn')
-            ->withErrors([
-            'email' => 'Please login to Again.',
-        ])->onlyInput('email');  
-    
-    }
+   
     public function transcode()
     {
     $code = \DB::table('companies')->where('domain', $_SERVER['HTTP_HOST'])->first();
