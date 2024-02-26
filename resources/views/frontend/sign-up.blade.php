@@ -77,7 +77,7 @@
     <script>
     $(document).ready(function(){
          $('#signUp_form').validetta({
-          
+         
                 display : 'inline',
                 realTime :true,
                 errorTemplateClass : 'validetta-inline',

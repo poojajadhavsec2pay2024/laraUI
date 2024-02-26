@@ -40,19 +40,58 @@ class TransactionHistoryController extends Controller
     //    $reportData = DB::table('report_dmt')->get();
        
     //     return view('frontend.viewhistory', compact('columns', 'reportData'));
-       
-    $customColumnNames = [
+    $customColumnNames=[];
+      // dd($user->id);
+       $customColumnNames+= [
+        'id' => 'SR No',
+        'mobile' => 'Mobile',
+        'txnid'=> 'Transaction ID',
         'sender_name' => 'Sender Name',
         'beneficiary_name' => 'Beneficiary Name',
-        'txnid'=> 'Transaction ID',
+        'beneficiary_account'=> 'Beneficiary Account',
+        'amount'=> 'Amount',
+        'status'=> 'Status',
+        'refno2'=> 'Order ID',
+         
     ];
+       if($user->role_id==13)
+       {
+            $customColumnNames += [
+                'transfer_mode' => 'Transfer Mode',
+                'refno' => 'Ref No',
+                'dt_com' => 'Distributer Commisions',
+            ];
+        }
+        else if($user->role_id==12)
+       {
+            $customColumnNames += [
+               
+                'dt_com' => 'Distributer Commisions',
+                'md_com' => 'Master Distributer Commisions',
+            ];
+        }
+        else{
+            // $customColumnNames += [
+            //     'remark' => 'Remark ',
+            // ];
+        }
     
     // Example of selecting specific columns from the report data
     $selectedColumns = array_keys($customColumnNames);
     
     // Fetching report data from the database
-    $reportData = DB::table('report_dmt')->select($selectedColumns)->get();
-    
+    if($user->role_id==13)
+       {
+    $reportData = DB::table('report_dmt')->select($selectedColumns)->where('dt_id',$user->id)->get();
+       }elseif($user->role_id==12)
+       {
+        $reportData = DB::table('report_dmt')->select($selectedColumns)->where('md_id',$user->id)->get();
+       }elseif($user->role_id==11){
+        $reportData = DB::table('report_dmt')->select($selectedColumns)->where('wl_id',$user->id)->get();
+       }else{
+        $reportData = DB::table('report_dmt')->select($selectedColumns)->get();
+       }
+    //dd($reportData);
     // Passing $customColumnNames, $selectedColumns, and $reportData to the view
     return view('frontend.viewhistory', compact('customColumnNames', 'selectedColumns', 'reportData'));
       

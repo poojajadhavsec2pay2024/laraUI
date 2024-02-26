@@ -30,7 +30,8 @@ class LoginRegisterController extends Controller
 
     public function store(Request $request)
     {
-       
+      
+
         $request->validate([
             'name' => 'required|string|max:250',
             'email' => 'required|email|max:250|unique:users',
@@ -43,6 +44,8 @@ class LoginRegisterController extends Controller
             $users->email=$request->email;
             $users->password=Hash::make($request->password);
             $users->remember_token=$request->_token;
+            $users->role_id =\Auth::id();
+
             $users->save();
 
             $credentials = $request->only('email', 'password');

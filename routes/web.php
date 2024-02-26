@@ -93,8 +93,8 @@ Route::any('/getcustomerprofile',[InterfaceController::class, 'getCustomerProfil
 // Route::post('/addbeneficiaryotp',[DMTV5Controller::class, 'addBeneficiaryOtp'])->name('addBeneficiaryOtp');
 
 Route::controller(DMTV5Controller::class)->group(function () {
-Route::any('/instantpaydmt','instantPayDMT')->name('instantPayDMT');
-Route::any('/remitterregister','instantPayRemitterRegister')->name('instantPayRemitterRegister');
+Route::any('/indonepaldmt','indoNepalDMT')->name('indoNepalDMT');
+Route::any('/indonepalremitterregister','indoNepalRemitterRegister')->name('indoNepalRemitterRegister');
 Route::post('/checkremitterstatus','checkRemitterStatus')->name('checkRemitterStatus');
 Route::post('/getdistrict','getDistrict')->name('getDistrict');
 Route::post('/getnepaldistrict','getNepalDistrict')->name('getNepalDistrict');

@@ -48,7 +48,7 @@ class DMTV5Helper {
         $instantpayData["status"]="success";
         $instantpayData["header"]=$header;
         $txnID=rand();
-        $product="InstantpayDMT";
+        $product="IndonepalDmt";
         $url="https://api.instantpay.in/user/outlet/signup/initiate";
         $para['mobile']=$data['mobile'];
         $para['email']=$data['email'];
@@ -140,7 +140,7 @@ class DMTV5Helper {
         $instantpayData["status"]="success";
         $instantpayData["header"]=$header;
         $txnID=rand();
-        $product="InstantpayDMT";
+        $product="IndonepalDmt";
         $url="https://api.instantpay.in/user/outlet/signup/validate";
         $para['otpReferenceID']=$data['otpReferenceID'];
         $para['otp']=$data['otp'];
@@ -222,7 +222,7 @@ class DMTV5Helper {
             }
           $url=$instantpayData["apiUrl"]."outletActivationStatus";
           $txnID=rand();
-          $product="InstantpayDMT";
+          $product="IndonepalDmt";
           $para['partnerTxnId']=$data['partnerTxnId'];
           $parameters=json_encode($para);
         
@@ -300,7 +300,7 @@ class DMTV5Helper {
             }
           $url=$instantpayData["apiUrl"]."staticData";
           $txnID=rand();
-          $product="InstantpayDMT";
+          $product="IndonepalDmt";
           ///* Available Types are :Gender, Nationality, IDType, IncomeSource, Relationship, PaymentMode, RemittanceReason */
           $para['type']=$data['type']; //
           $parameters=json_encode($para);
@@ -383,7 +383,7 @@ class DMTV5Helper {
           $url=$instantpayData["apiUrl"]."paymentLocationList";
              
           $txnID=rand();
-          $product="InstantpayDMT";
+          $product="IndonepalDmt";
           $para['type']=$data['type'];
           $para['country']=$data['country'];
           $para['state']=$data['state'];
@@ -463,7 +463,7 @@ class DMTV5Helper {
             }
             $url=$instantpayData["apiUrl"]."stateDistrict";  
             $txnID=rand();
-            $product="InstantpayDMT";
+            $product="IndonepalDmt";
             $para['country']=$data['country'];
             $parameters=json_encode($para);
             
@@ -553,7 +553,7 @@ class DMTV5Helper {
             }
             $url=$instantpayData["apiUrl"]."remitterProfile";
             $txnID=rand();
-            $product="InstantpayDMT";
+            $product="IndonepalDmt";
             $para['mobile']=$data['mobile'];
             $parameters=json_encode($para);
             
@@ -640,7 +640,7 @@ class DMTV5Helper {
         }
            $url=$instantpayData["apiUrl"]."otpRequest"; 
             $txnID=rand();
-            $product="InstantpayDMT";
+            $product="IndonepalDmt";
             //$para["operation"]=$data['operation'];
             $para["mobile"]=$data['mobile'];
             if($data['operation']!='REMITTER_REGISTRATION')
@@ -732,7 +732,7 @@ class DMTV5Helper {
         }
            $url=$instantpayData["apiUrl"]."remitterRegistration";
             $txnID=rand();
-            $product="InstantpayDMT";
+            $product="IndonepalDmt";
             $para["name"] =$data["name"];
             $para["gender"] =$data["gender"];
             $para["dob"] =$data["dob"];
@@ -834,7 +834,7 @@ class DMTV5Helper {
             $url=$instantpayData["apiUrl"]."remitterEkycInitiate"; 
             
             $txnID=rand();
-            $product="InstantpayDMT";
+            $product="IndonepalDmt";
             $para["remitterId"] =$data["remitterId"];
             $parameters=json_encode($para);
             
@@ -908,7 +908,7 @@ class DMTV5Helper {
         }
             $url=$instantpayData["apiUrl"]."remitterEkycInitiateStatus"; 
             $txnID=rand();
-            $product="InstantpayDMT";
+            $product="IndonepalDmt";
             $para["remitterId"] =$data["remitterId"];
             $para["referenceKey"] =$data["referenceKey"];
             $parameters=json_encode($para);
@@ -989,7 +989,7 @@ class DMTV5Helper {
         }
            $url=$instantpayData["apiUrl"]."remitterEkycProcess"; 
            $txnID=rand();
-           $product="InstantpayDMT";
+           $product="IndonepalDmt";
            $para["remitterId"] =$data["remitterId"];
            $para["referenceKey"] =$data["referenceKey"];
            //$para["authenticationKey"] =$data["authenticationKey"];
@@ -1089,7 +1089,7 @@ class DMTV5Helper {
         }
            $url=$instantpayData["apiUrl"]."remitterUpdate"; 
            $txnID=rand();
-           $product="InstantpayDMT";
+           $product="IndonepalDmt";
            $para["remitterType"] =$data["remitterType"];
            $para["incomeSourceType"] =$data["incomeSourceType"];
            $para["annualIncome"] =$data["annualIncome"];
@@ -1163,7 +1163,7 @@ class DMTV5Helper {
         }
             $url=$instantpayData["apiUrl"]."beneficiaryRegistration"; 
             $txnID=rand();
-            $product="InstantpayDMT";
+            $product="IndonepalDmt";
             $para["remitterMobile"]=$data["remitterMobile"]; 
             $para["name"]=$data["name"];
             $para["gender"]=$data["gender"];
@@ -1251,7 +1251,7 @@ class DMTV5Helper {
         }
             $url=$instantpayData["apiUrl"]."serviceCharge"; 
             $txnID=rand();
-            $product="InstantpayDMT";
+            $product="IndonepalDmt";
             $para["country"]=$data["country"];
             $para["paymentMode"]=$data["paymentMode"];
            if($data["transferAmount"])
@@ -1337,7 +1337,7 @@ class DMTV5Helper {
         }
            $url=$instantpayData["apiUrl"]."fundTransfer"; 
            $txnID=rand();
-           $product="InstantpayDMT";
+           $product="IndonepalDmt";
            $para["externalRef"]=$data["externalRef"];
            $para["remitterMobile"]=$data["remitterMobile"];
            $para["beneficiaryId"]=$data["beneficiaryId"];
@@ -1430,7 +1430,7 @@ class DMTV5Helper {
         }
            $url=$instantpayData["apiUrl"]."fetchTransactionStatus"; 
            $txnID=rand();
-           $product="InstantpayDMT";
+           $product="IndonepalDmt";
            $para["ipayId"]=$data["ipayId"];
            $para["latitude"]=$data["latitude"];
            $para["longitude"]=$data["longitude"];
@@ -1488,7 +1488,7 @@ class DMTV5Helper {
         else if (in_array($jsonD->statuscode, ['IVC','ERR','RPI','ISE']))   
         { 
             $output['status'] = "success";
-            $output['apistatus']='TTRANSFER_FAILED';
+            $output['apistatus']='TRANSFER_FAILED';
             $output['message']= "Transaction Status Failed to Fetch";
             $output['apiremark']= isset($jsonD->status) ? $jsonD->status : "NA";
             $output['data'] =isset($jsonD->data) ? $jsonD->data : [];
