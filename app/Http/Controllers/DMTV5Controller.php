@@ -55,7 +55,7 @@ class DMTV5Controller extends Controller
     }
     public function validateoutletdetails1(Request $request)
     {
-        dd($request->all());
+       // dd($request->all());
         $data['api']="indonepalvalidateoutletdetailss";
         $data["via"]="web";
         $data['otpReferenceID']=$request->otpReferenceID;
@@ -70,10 +70,17 @@ class DMTV5Controller extends Controller
     }
     public function activationStatus(Request $request)
     {
-        $request->validate([
+        $rules=array(
             'partnerTxnId' => 'required'
           
-         ]);
+         );
+         $validator = \Validator::make($request->all(),$rules);
+         if($validator->fails()){
+          foreach($validator->errors()->messages() as $key => $value){
+              $error = $value[0];
+          }
+          return response()->json(['status' => 'failed','message' => $error, 'act'=>'RETRY'], 400);
+         }
         $data['api']="indonepalactivationStatus";
         $data["via"]="web";
         $data['partnerTxnId']=$request->partnerTxnId;
@@ -86,10 +93,17 @@ class DMTV5Controller extends Controller
     }
     public function staticData(Request $request)
     {
-        $request->validate([
+        $rules=array(
             'type' => 'required|string'
           
-         ]);
+         );
+         $validator = \Validator::make($request->all(),$rules);
+         if($validator->fails()){
+          foreach($validator->errors()->messages() as $key => $value){
+              $error = $value[0];
+          }
+          return response()->json(['status' => 'failed','message' => $error, 'act'=>'RETRY'], 400);
+         }
         $data['api']="indonepalstaticData";
         $data["via"]="web";
         $data['type']=$request->type;
@@ -104,12 +118,19 @@ class DMTV5Controller extends Controller
         /*This API Used to Fetch the location of PAyment*/
     public function paymentLocationList(Request $request)
     {
-        $request->validate([
+        $rules=array(
             'paymentMode' => 'required|string',
             'state' => 'required|string',
             'district' => 'required|string'
-         ]);
-        $data['api']="indonepalmentLocationList";
+         );
+         $validator = \Validator::make($request->all(),$rules);
+         if($validator->fails()){
+          foreach($validator->errors()->messages() as $key => $value){
+              $error = $value[0];
+          }
+          return response()->json(['status' => 'failed','message' => $error, 'act'=>'RETRY'], 400);
+         }
+        $data['api']="indonepalpaymentLocationList";
         $data["via"]="web";
         if($request->type=='Cash Payment'){
         $data['type']='CASHPAY';
@@ -156,10 +177,16 @@ class DMTV5Controller extends Controller
     }
     public function stateDistrict(Request $request)
     {
-        $request->validate([
+        $rules=array(
             'country' => 'required|string'
-         ]);
-        
+         );
+         $validator = \Validator::make($request->all(),$rules);
+        if($validator->fails()){
+         foreach($validator->errors()->messages() as $key => $value){
+             $error = $value[0];
+         }
+         return response()->json(['status' => 'failed','message' => $error, 'act'=>'RETRY'], 400);
+        }
         $data['api']="indonepalstateDistrict";
         $data["via"]="web";
         $data['country']=$request->country;
@@ -186,10 +213,17 @@ class DMTV5Controller extends Controller
     }
     public function remitterProfile(Request $request)
     {
-        $request->validate([
-           'mobile' => 'required'
-        ]);
-       
+        $rules=array(
+            'mobile' => 'required|numeric|digits:10',
+         );
+         $validator = \Validator::make($request->all(),$rules);
+         if($validator->fails()){
+          foreach($validator->errors()->messages() as $key => $value){
+              $error = $value[0];
+          }
+          return response()->json(['status' => 'failed','message' => $error, 'act'=>'RETRY'], 400);
+         }
+         
         $data['api']="indonepalremitterProfile";
         $data["via"]="web";
         $data['mobile']=$request->mobile;

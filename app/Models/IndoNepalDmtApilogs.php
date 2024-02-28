@@ -7,12 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class IndoNepalDmtApilogs extends Model
 {
-    public $table="indonepaldmt_apilogs";
+    public $table="indonepaldata_apilogs";
     protected $fillable = [
         'product',
         'url',
         'source',
         'txnid',
+        'user_id',
         'header',
         'request',
         'response',

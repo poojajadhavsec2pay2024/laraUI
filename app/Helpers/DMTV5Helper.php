@@ -52,6 +52,7 @@ class DMTV5Helper {
         $url="https://api.instantpay.in/user/outlet/signup/initiate";
         $para['mobile']=$data['mobile'];
         $para['email']=$data['email'];
+        $via=$data['via'];
         //$para['aadhaar']=$data['aadhaar'];
         $para['pan']=$data['pan'];
         $para['bankAccountNo']=$data['bankAccountNo'];
@@ -64,7 +65,7 @@ class DMTV5Helper {
         $parameters=json_encode($para);
        //dd($parameters);
         if(!$mockMode){   
-            $result = \PortalAPIHub::curl($product, $url, "POST", $parameters, $instantpayData["header"], "YES", "DMTV5Helper", $txnID);
+            $result = \PortalAPIHub::curl($product, $url, "POST", $parameters, $instantpayData["header"], "YES", $via, $txnID);
            // dd($result);
             if($result["code"]!=200){
                 $resMessage=json_decode($result['response']);
@@ -142,13 +143,14 @@ class DMTV5Helper {
         $txnID=rand();
         $product="IndonepalDmt";
         $url="https://api.instantpay.in/user/outlet/signup/validate";
+        $via=$data['via'];
         $para['otpReferenceID']=$data['otpReferenceID'];
         $para['otp']=$data['otp'];
         $para['hash']=$data['hash'];
         $parameters=$para;
         // dd($parameters);
         if(!$mockMode){   
-            $result = \PortalAPIHub::curl($product, $url, "POST", $parameters, $instantpayData["header"], "YES", "DMTV5Helper", $txnID);
+            $result = \PortalAPIHub::curl($product, $url, "POST", $parameters, $instantpayData["header"], "YES", $via, $txnID);
            // dd($result);
             if($result["code"]!=200){
                 $resMessage=json_decode($result['response']);
@@ -223,11 +225,12 @@ class DMTV5Helper {
           $url=$instantpayData["apiUrl"]."outletActivationStatus";
           $txnID=rand();
           $product="IndonepalDmt";
+          $via=$data['via'];
           $para['partnerTxnId']=$data['partnerTxnId'];
           $parameters=json_encode($para);
         
         if(!$mockMode){   
-            $result = \PortalAPIHub::curl($product, $url, "GET", $parameters, $instantpayData["header"], "YES", "DMTV5Helper", $txnID);
+            $result = \PortalAPIHub::curl($product, $url, "GET", $parameters, $instantpayData["header"], "YES", $via, $txnID);
              if($result["code"]!=200){
                 $resMessage=json_decode($result['response']);
                 $output['apistatus']='IN-ACTIVE';
@@ -301,13 +304,14 @@ class DMTV5Helper {
           $url=$instantpayData["apiUrl"]."staticData";
           $txnID=rand();
           $product="IndonepalDmt";
+          $via=$data['via'];
           ///* Available Types are :Gender, Nationality, IDType, IncomeSource, Relationship, PaymentMode, RemittanceReason */
           $para['type']=$data['type']; //
           $parameters=json_encode($para);
         
         if(!$mockMode){
                     
-            $result = \PortalAPIHub::curl($product, $url, "GET", $parameters, $instantpayData["header"], "YES", "DMTV5Helper", $txnID);
+            $result = \PortalAPIHub::curl($product, $url, "GET", $parameters, $instantpayData["header"], "YES", $via, $txnID);
            // dd($result);
             if($result["code"]!=200){
                 $resMessage=json_decode($result['response']);
@@ -384,6 +388,7 @@ class DMTV5Helper {
              
           $txnID=rand();
           $product="IndonepalDmt";
+          $via=$data['via'];
           $para['type']=$data['type'];
           $para['country']=$data['country'];
           $para['state']=$data['state'];
@@ -392,7 +397,7 @@ class DMTV5Helper {
         
         if(!$mockMode){
                     
-            $result = \PortalAPIHub::curl($product, $url, "GET", $parameters, $instantpayData["header"], "YES", "DMTV5Helper", $txnID);
+            $result = \PortalAPIHub::curl($product, $url, "GET", $parameters, $instantpayData["header"], "YES", $via, $txnID);
             if($result["code"]!=200){
                 $resMessage=json_decode($result['response']);
                 $output["status"]="success";
@@ -464,12 +469,13 @@ class DMTV5Helper {
             $url=$instantpayData["apiUrl"]."stateDistrict";  
             $txnID=rand();
             $product="IndonepalDmt";
+            $via=$data['via'];
             $para['country']=$data['country'];
             $parameters=json_encode($para);
             
         if(!$mockMode){
                     
-            $result = \PortalAPIHub::curl($product, $url, "GET", $parameters, $instantpayData["header"], "YES", "DMTV5Helper", $txnID);
+            $result = \PortalAPIHub::curl($product, $url, "GET", $parameters, $instantpayData["header"], "YES", $via, $txnID);
             if($result["code"]!=200){
                 $resMessage=json_decode($result['response']);
                 $output["status"]="success";
@@ -554,12 +560,13 @@ class DMTV5Helper {
             $url=$instantpayData["apiUrl"]."remitterProfile";
             $txnID=rand();
             $product="IndonepalDmt";
+            $via=$data['via'];
             $para['mobile']=$data['mobile'];
             $parameters=json_encode($para);
             
         if(!$mockMode){
                     
-            $result = \PortalAPIHub::curl($product, $url, "GET", $parameters, $instantpayData["header"], "YES", "DMTV5Helper", $txnID);
+            $result = \PortalAPIHub::curl($product, $url, "GET", $parameters, $instantpayData["header"], "YES", $via, $txnID);
             
             //d//d($result);
             if($result["code"]!=200){
@@ -641,6 +648,7 @@ class DMTV5Helper {
            $url=$instantpayData["apiUrl"]."otpRequest"; 
             $txnID=rand();
             $product="IndonepalDmt";
+            $via=$data['via'];
             //$para["operation"]=$data['operation'];
             $para["mobile"]=$data['mobile'];
             if($data['operation']!='REMITTER_REGISTRATION')
@@ -661,7 +669,7 @@ class DMTV5Helper {
           
         if(!$mockMode){
                     
-            $result = \PortalAPIHub::curl($product, $url, "POST", $parameters, $instantpayData["header"], "YES", "DMTV5Helper", $txnID);
+            $result = \PortalAPIHub::curl($product, $url, "POST", $parameters, $instantpayData["header"], "YES", $via, $txnID);
            
             if($result["code"]!=200){
                 $resMessage=json_decode($result['response']);
@@ -733,6 +741,7 @@ class DMTV5Helper {
            $url=$instantpayData["apiUrl"]."remitterRegistration";
             $txnID=rand();
             $product="IndonepalDmt";
+            $via=$data['via'];
             $para["name"] =$data["name"];
             $para["gender"] =$data["gender"];
             $para["dob"] =$data["dob"];
@@ -758,7 +767,7 @@ class DMTV5Helper {
             
         if(!$mockMode){
                     
-            $result = \PortalAPIHub::curl($product, $url, "POST", $parameters, $instantpayData["header"], "YES", "DMTV5Helper", $txnID);
+            $result = \PortalAPIHub::curl($product, $url, "POST", $parameters, $instantpayData["header"], "YES", $via, $txnID);
            
             if($result["code"]!=200){
                 $resMessage=json_decode($result['response']);
@@ -835,12 +844,13 @@ class DMTV5Helper {
             
             $txnID=rand();
             $product="IndonepalDmt";
+            $via=$data['via'];
             $para["remitterId"] =$data["remitterId"];
             $parameters=json_encode($para);
             
         if(!$mockMode){
                     
-            $result = \PortalAPIHub::curl($product, $url, "GET", $parameters, $instantpayData["header"], "YES", "DMTV5Helper", $txnID);
+            $result = \PortalAPIHub::curl($product, $url, "GET", $parameters, $instantpayData["header"], "YES", $via, $txnID);
            
             if($result["code"]!=200){
                 $resMessage=json_decode($result['response']);
@@ -909,12 +919,13 @@ class DMTV5Helper {
             $url=$instantpayData["apiUrl"]."remitterEkycInitiateStatus"; 
             $txnID=rand();
             $product="IndonepalDmt";
+            $via=$data['via'];
             $para["remitterId"] =$data["remitterId"];
             $para["referenceKey"] =$data["referenceKey"];
             $parameters=json_encode($para);
         if(!$mockMode){
                     
-            $result = \PortalAPIHub::curl($product, $url, "GET", $parameters, $instantpayData["header"], "YES", "DMTV5Helper", $txnID);
+            $result = \PortalAPIHub::curl($product, $url, "GET", $parameters, $instantpayData["header"], "YES", $via, $txnID);
             if($result["code"]!=200){
                 $resMessage=json_decode($result['response']);
                 $output["status"]="success";
@@ -990,6 +1001,7 @@ class DMTV5Helper {
            $url=$instantpayData["apiUrl"]."remitterEkycProcess"; 
            $txnID=rand();
            $product="IndonepalDmt";
+           $via=$data['via'];
            $para["remitterId"] =$data["remitterId"];
            $para["referenceKey"] =$data["referenceKey"];
            //$para["authenticationKey"] =$data["authenticationKey"];
@@ -1013,7 +1025,7 @@ class DMTV5Helper {
            //dd($parameters);
         if(!$mockMode){
                     
-            $result = \PortalAPIHub::curl($product, $url, "POST", $parameters, $instantpayData["header"], "YES", "DMTV5Helper", $txnID);
+            $result = \PortalAPIHub::curl($product, $url, "POST", $parameters, $instantpayData["header"], "YES", $via, $txnID);
            // dd($result);
             if($result["code"]!=200){
                 $resMessage=json_decode($result['response']);
@@ -1090,6 +1102,7 @@ class DMTV5Helper {
            $url=$instantpayData["apiUrl"]."remitterUpdate"; 
            $txnID=rand();
            $product="IndonepalDmt";
+           $via=$data['via'];
            $para["remitterType"] =$data["remitterType"];
            $para["incomeSourceType"] =$data["incomeSourceType"];
            $para["annualIncome"] =$data["annualIncome"];
@@ -1098,7 +1111,7 @@ class DMTV5Helper {
           // dd($parameters);
         if(!$mockMode){
                     
-            $result = \PortalAPIHub::curl($product, $url, "POST", $parameters, $instantpayData["header"], "YES", "DMTV5Helper", $txnID);
+            $result = \PortalAPIHub::curl($product, $url, "POST", $parameters, $instantpayData["header"], "YES", $via, $txnID);
             if($result["code"]!=200){
                 $resMessage=json_decode($result['response']);
                 $output["status"]="success";
@@ -1164,6 +1177,7 @@ class DMTV5Helper {
             $url=$instantpayData["apiUrl"]."beneficiaryRegistration"; 
             $txnID=rand();
             $product="IndonepalDmt";
+            $via=$data['via'];
             $para["remitterMobile"]=$data["remitterMobile"]; 
             $para["name"]=$data["name"];
             $para["gender"]=$data["gender"];
@@ -1183,7 +1197,7 @@ class DMTV5Helper {
           // dd($parameters);
         if(!$mockMode){
                     
-            $result = \PortalAPIHub::curl($product, $url, "POST", $parameters, $instantpayData["header"], "YES", "DMTV5Helper", $txnID);
+            $result = \PortalAPIHub::curl($product, $url, "POST", $parameters, $instantpayData["header"], "YES", $via, $txnID);
            
             if($result["code"]!=200){
                 $resMessage=json_decode($result['response']);
@@ -1252,6 +1266,7 @@ class DMTV5Helper {
             $url=$instantpayData["apiUrl"]."serviceCharge"; 
             $txnID=rand();
             $product="IndonepalDmt";
+            $via=$data['via'];
             $para["country"]=$data["country"];
             $para["paymentMode"]=$data["paymentMode"];
            if($data["transferAmount"])
@@ -1270,7 +1285,7 @@ class DMTV5Helper {
              $parameters=json_encode($para);
            //dd($parameters);
         if(!$mockMode){        
-            $result = \PortalAPIHub::curl($product, $url, "GET", $parameters, $instantpayData["header"], "YES", "DMTV5Helper", $txnID);
+            $result = \PortalAPIHub::curl($product, $url, "GET", $parameters, $instantpayData["header"], "YES", $via, $txnID);
             if($result["code"]!=200){
                 $resMessage=json_decode($result['response']);
                 $output["status"]="success";
@@ -1338,6 +1353,7 @@ class DMTV5Helper {
            $url=$instantpayData["apiUrl"]."fundTransfer"; 
            $txnID=rand();
            $product="IndonepalDmt";
+           $via=$data['via'];
            $para["externalRef"]=$data["externalRef"];
            $para["remitterMobile"]=$data["remitterMobile"];
            $para["beneficiaryId"]=$data["beneficiaryId"];
@@ -1351,7 +1367,7 @@ class DMTV5Helper {
            //dd($parameters);
         if(!$mockMode){
                     
-            $result = \PortalAPIHub::curl($product, $url, "POST", $parameters, $instantpayData["header"], "YES", "DMTV5Helper", $txnID);
+            $result = \PortalAPIHub::curl($product, $url, "POST", $parameters, $instantpayData["header"], "YES", $via, $txnID);
           // dd($result);
 
             if($result["code"]!=200){
@@ -1431,6 +1447,7 @@ class DMTV5Helper {
            $url=$instantpayData["apiUrl"]."fetchTransactionStatus"; 
            $txnID=rand();
            $product="IndonepalDmt";
+           $via=$data['via'];
            $para["ipayId"]=$data["ipayId"];
            $para["latitude"]=$data["latitude"];
            $para["longitude"]=$data["longitude"];
@@ -1438,7 +1455,7 @@ class DMTV5Helper {
            //dd($parameters);
         if(!$mockMode){
                     
-            $result = \PortalAPIHub::curl($product, $url, "GET", $parameters, $instantpayData["header"], "YES", "DMTV5Helper", $txnID);
+            $result = \PortalAPIHub::curl($product, $url, "GET", $parameters, $instantpayData["header"], "YES", $via, $txnID);
            // dd($result);
 
             if($result["code"]!=200){

@@ -8,7 +8,6 @@ use App\Http\Controllers\DMTV5Controller;
 use App\Http\Middleware\Authenticate;
 use App\Http\Controllers\API\IndoNepalApiDmtController;
 
-
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -46,23 +45,24 @@ Route::post('/refund-otp',[DMTV4Controller::class, 'refundOtp']);
 Route::post('/claim-refund',[DMTV4Controller::class, 'claimRefund']);
 
 //****************************routes regarding Indo Nepal DMT *******************************
-Route::post('indonepaldmt/getoutletdetails',[DMTV5Controller::class, 'getoutletdetails']);
-Route::post('indonepaldmt/validateoutletdetails1',[DMTV5Controller::class, 'validateoutletdetails1']);
-Route::post('indonepaldmt/getvalidateoutletdetails',[DMTV5Controller::class, 'getvalidateOutletDetails']);
-
-Route::get('indonepaldmt/activationstatus',[DMTV5Controller::class, 'activationStatus'])->name('activationStatus');
-Route::get('indonepaldmt/staticdata',[DMTV5Controller::class, 'staticData'])->name('staticData');
-Route::post('indonepaldmt/paymentlocationList',[DMTV5Controller::class, 'paymentLocationList'])->name('paymentLocationList');
-Route::get('indonepaldmt/statedistrict',[DMTV5Controller::class, 'stateDistrict'])->name('stateDistrict');
-Route::post('indonepaldmt/remitter/profile',[DMTV5Controller::class, 'remitterProfile'])->name('remitterProfile');
-Route::post('indonepaldmt/sendotp',[DMTV5Controller::class, 'sendOtp'])->name('sendOtp');
-Route::post('indonepaldmt/remitter/registration',[DMTV5Controller::class, 'remitterRegistration'])->name('remitterRegistration');
-Route::post('indonepaldmt/remitter/ekycinitiate',[DMTV5Controller::class, 'remitterEkycInitiate'])->name('remitterEkycInitiate');
-Route::post('indonepaldmt/remitter/ekycinitiatestatus',[DMTV5Controller::class, 'remitterEkycInitiateStatus'])->name('remitterEkycInitiateStatus');
-Route::post('indonepaldmt/remitter/ekycprocess',[DMTV5Controller::class, 'remitterEkycProcess'])->name('remitterEkycProcess');
-Route::post('indonepaldmt/remitter/update',[DMTV5Controller::class, 'remitterUpdate'])->name('remitterUpdate');
-Route::post('indonepaldmt/beneficiary/add',[DMTV5Controller::class, 'beneficiaryRegistration'])->name('beneficiaryRegistration');
-Route::get('indonepaldmt/servicecharge',[DMTV5Controller::class, 'serviceCharge'])->name('serviceCharge');
-Route::post('indonepaldmt/fundtransfer',[DMTV5Controller::class, 'fundTransfer'])->name('fundTransfer');
-Route::get('indonepaldmt/fetchtransactionstatus',[DMTV5Controller::class, 'fetchTransactionStatus'])->name('fetchTransactionStatus');
-Route::post('indonepaldmt/addbeneficiaryotp',[DMTV5Controller::class, 'addBeneficiaryOtp'])->name('addBeneficiaryOtp');
+Route::prefix('indonepaldmt')->group(function () {
+    Route::post('getoutletdetails', [IndoNepalApiDmtController::class, 'getOutletDetails']);
+    Route::post('validateoutletdetails1', [IndoNepalApiDmtController::class, 'validateOutletDetails1']);
+    Route::post('getvalidateoutletdetails', [IndoNepalApiDmtController::class, 'getValidateOutletDetails']);
+    Route::get('activationstatus', [IndoNepalApiDmtController::class, 'activationStatus'])->name('activationStatus');
+    Route::get('staticdata', [IndoNepalApiDmtController::class, 'staticData'])->name('staticData');
+    Route::post('paymentlocationList', [IndoNepalApiDmtController::class, 'paymentLocationList'])->name('paymentLocationList');
+    Route::get('statedistrict', [IndoNepalApiDmtController::class, 'stateDistrict'])->name('stateDistrict');
+    Route::post('remitter/profile', [IndoNepalApiDmtController::class, 'remitterProfile'])->name('remitterProfile');
+    Route::post('sendotp', [IndoNepalApiDmtController::class, 'sendOtp'])->name('sendOtp');
+    Route::post('remitter/registration', [IndoNepalApiDmtController::class, 'remitterRegistration'])->name('remitterRegistration');
+    Route::post('remitter/ekycinitiate', [IndoNepalApiDmtController::class, 'remitterEkycInitiate'])->name('remitterEkycInitiate');
+    Route::post('remitter/ekycinitiatestatus', [IndoNepalApiDmtController::class, 'remitterEkycInitiateStatus'])->name('remitterEkycInitiateStatus');
+    Route::post('remitter/ekycprocess', [IndoNepalApiDmtController::class, 'remitterEkycProcess'])->name('remitterEkycProcess');
+    Route::post('remitter/update', [IndoNepalApiDmtController::class, 'remitterUpdate'])->name('remitterUpdate');
+    Route::post('beneficiary/add', [IndoNepalApiDmtController::class, 'beneficiaryRegistration'])->name('beneficiaryRegistration');
+    Route::get('servicecharge', [IndoNepalApiDmtController::class, 'serviceCharge'])->name('serviceCharge');
+    Route::post('fundtransfer', [IndoNepalApiDmtController::class, 'fundTransfer'])->name('fundTransfer');
+    Route::get('fetchtransactionstatus', [IndoNepalApiDmtController::class, 'fetchTransactionStatus'])->name('fetchTransactionStatus');
+    Route::post('addbeneficiaryotp', [IndoNepalApiDmtController::class, 'addBeneficiaryOtp'])->name('addBeneficiaryOtp');
+});
