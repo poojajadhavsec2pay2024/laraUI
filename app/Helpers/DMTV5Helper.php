@@ -328,7 +328,7 @@ class DMTV5Helper {
         
             $value='staticData';
             $result = \DmtRes::response($value,$mockmodestatus);
-    
+           //dd($result);
             $jsonD=json_decode(json_encode($result["response"]));
         }
 
@@ -686,6 +686,7 @@ class DMTV5Helper {
             $value='sendOtp';
             $result = \DmtRes::response($value,$mockmodestatus);
             $jsonD=json_decode(json_encode($result["response"]));
+            //dd($jsonD[0]->statuscode);
         }
 
         if(json_last_error() != 0){
@@ -1292,11 +1293,12 @@ class DMTV5Helper {
            //dd($parameters);
         if(!$mockMode){        
             $result = \PortalAPIHub::curl($product, $url, "GET", $parameters, $instantpayData["header"], "YES", $via, $txnID);
+          //  dd( $result);
             if($result["code"]!=200){
                 $resMessage=json_decode($result['response']);
                 $output["status"]="success";
                 $output['apistatus']='FETCH_DATA_PENDING';
-                $output["message"]="External API call failed with ".$result["code"].'( ' .$resMessage->status.')';
+                $output["message"]="External API call failed with ".$result["code"].'( ' .$resMessage->message.')';
                 $output['apiremark']=$output["message"];
                 $output["code"]=$result["code"];     
                  return $output;

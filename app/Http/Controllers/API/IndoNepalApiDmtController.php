@@ -195,7 +195,7 @@ class IndoNepalApiDmtController extends Controller
         
         $data["via"]="api";
         $data['type']=$request->type;
-        $mockmode = false;
+        $mockmode = true;
         
         $mockmodestatus="SUCCESS";//FAILED,PENDING
         /*Available Types are :Gender, Nationality, IDType, IncomeSource, Relationship, PaymentMode, RemittanceReason*/
@@ -274,7 +274,7 @@ class IndoNepalApiDmtController extends Controller
         $data['country']='NEPAL';
         $data['state']=$request->state;
         $data['district']=$request->district;
-        $mockmode = false;
+        $mockmode = true;
         $mockmodestatus="SUCCESS";//FAILED,PENDING
 
         $result = \DmtApiv5::paymentLocationList($data, $mockmode,$validateData['mockmodestatus']);
@@ -952,7 +952,7 @@ class IndoNepalApiDmtController extends Controller
         $data["referenceKey"] =$request->referenceKey;
         $data["ekycdata"] =$request->ekycdata;
        
-        $mockmode = false;
+        $mockmode = true;
         $mockmodestatus="SUCCESS";//FAILED,PENDING
         $result = \DmtApiv5::remitterEkycProcess($data, $mockmode,$validateData['mockmodestatus']);
         if($result['apistatus'] == 'REMITTER_EKYC_SUCCESS'){
@@ -1036,7 +1036,7 @@ class IndoNepalApiDmtController extends Controller
         $data["incomeSourceType"] =$request->incomeSourceType;
         $data["annualIncome"] =$request->annualIncome;
         $data["remitterId"] =$request->remitterId;
-        $mockmode = false;
+        $mockmode = true;
         $mockmodestatus="SUCCESS";//FAILED,PENDING
         $result = \DmtApiv5::remitterUpdate($data, $mockmode,$validateData['mockmodestatus']);
         if($result['apistatus'] == 'REMITTER_UPDATE_SUCCESS'){
@@ -1149,7 +1149,7 @@ class IndoNepalApiDmtController extends Controller
             return response()->json($output, 200);
         }
         $result = \DmtApiv5::beneficiaryRegistration($data, $mockmode,$validateData['mockmodestatus']);
-       
+       //dd($result);
         if(!empty($result['data']))
        {
        
@@ -1246,7 +1246,7 @@ class IndoNepalApiDmtController extends Controller
         $data["transferAmount"]=$request->transferAmount;
         $data["payoutAmount"]=$request->payoutAmount;
         $data["bankBranchId"]=$request->bankBranchId;
-        $mockmode = false;
+        $mockmode = true;
         $mockmodestatus="SUCCESS";//FAILED,PENDING
         $result = \DmtApiv5::serviceCharge($data, $mockmode,$validateData['mockmodestatus']);
         if(!empty($result['data']))

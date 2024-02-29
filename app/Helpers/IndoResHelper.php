@@ -47,7 +47,9 @@ class IndoResHelper
                     "code" => 200,
                 ];
             } else {
-                return $result = [];
+                return $result = ["response" => [],
+                "error" => "",
+                "code" => 200,];
             }
         } elseif ($value == "staticData") {
             if ($mockmodestatus == "SUCCESS") {
@@ -83,7 +85,7 @@ class IndoResHelper
                     "error" => "",
                     "code" => 200,
                 ];
-            } elseif ($mockmodestatus == "PENDING") {
+            } elseif ($mockmodestatus == "FAILED") {
                 return $result = [
                     "response" => [
                         "statuscode" => "ERR",
@@ -100,7 +102,9 @@ class IndoResHelper
                     "code" => 200,
                 ];
             } else {
-                return $result = [];
+                return $result = ["response" => ["statuscode" => []],
+                "error" => "",
+                "code" => 200,];
             }
         } elseif ($value == "paymentLocationList") {
             if ($mockmodestatus == "SUCCESS") {
@@ -152,7 +156,9 @@ class IndoResHelper
                     "code" => 200,
                 ];
             } else {
-                return $result = [];
+                return $result = ["response" => [],
+                "error" => "",
+                "code" => 200,];
             }
         } elseif ($value == "stateDistrict") {
             if ($mockmodestatus == "SUCCESS") {
@@ -220,7 +226,9 @@ class IndoResHelper
                     "code" => 200,
                 ];
             } else {
-                return $result = [];
+                return $result = ["response" => [],
+                "error" => "",
+                "code" => 200,];
             }
         } elseif ($value == "remitterProfile") {
             if ($mockmodestatus == "SUCCESS") {
@@ -300,7 +308,9 @@ class IndoResHelper
                     "code" => 200,
                 ];
             } else {
-                return $result = [];
+                return $result = ["response" => [],
+                "error" => "",
+                "code" => 200,];
             }
         } elseif ($value == "sendOtp") {
             if ($mockmodestatus == "SUCCESS") {
@@ -323,7 +333,7 @@ class IndoResHelper
                 ];
             } elseif ($mockmodestatus == "FAILED") {
                 return $result = [
-                    "response" => [
+                    "response" => 
                         [
                             "statuscode" => "RAR",
                             "actcode" => null,
@@ -337,12 +347,14 @@ class IndoResHelper
                             "environment" => "SANDBOX",
                             "internalCode" => null,
                         ],
-                    ],
+                    
                     "error" => "",
                     "code" => 200,
                 ];
             } else {
-                return $result = [];
+                return $result = ["response" => [],
+                "error" => "",
+                "code" => 200,];
             }
         } elseif ($value == "remitterRegistration") {
             if ($mockmodestatus == "SUCCESS") {
@@ -413,7 +425,9 @@ class IndoResHelper
                     "code" => 200,
                 ];
             } else {
-                return $result = [];
+                return $result = ["response" => [],
+                "error" => "",
+                "code" => 200,];
             }
         } elseif ($value == "remitterEkycInitiate") {
             if ($mockmodestatus == "SUCCESS") {
@@ -455,7 +469,9 @@ class IndoResHelper
                     "code" => 200,
                 ];
             } else {
-                return $result = [];
+                return $result = ["response" => [],
+                "error" => "",
+                "code" => 200,];
             }
         } elseif ($value == "remitterEkycInitiateStatus") {
             if ($mockmodestatus == "SUCCESS") {
@@ -491,7 +507,9 @@ class IndoResHelper
                     "code" => 200,
                 ];
             } else {
-                return $result = [];
+                return $result = ["response" => [],
+                "error" => "",
+                "code" => 200,];
             }
         } elseif ($value == "remitterEkycProcess") {
             if ($mockmodestatus == "SUCCESS") {
@@ -542,7 +560,9 @@ class IndoResHelper
                     "code" => 200,
                 ];
             } else {
-                return $result = [];
+                return $result = ["response" => [],
+                "error" => "",
+                "code" => 200,];
             }
         } elseif ($value == "remitterUpdate") {
             if ($mockmodestatus == "SUCCESS") {
@@ -578,7 +598,9 @@ class IndoResHelper
                     "code" => 200,
                 ];
             } else {
-                return $result = [];
+                return $result = ["response" => [],
+                "error" => "",
+                "code" => 200,];
             }
         } elseif ($value == "beneficiaryRegistration") {
             if ($mockmodestatus == "SUCCESS") {
@@ -661,12 +683,7 @@ class IndoResHelper
                         "actcode" => null,
                         "status" =>
                             "Another Receiver Already Exists with the Same Name 004",
-                        "data" => [
-                            "Code" => "042",
-                            "Message" =>
-                                "Another Receiver Already Exists with the Same Name [004]",
-                            "ReceiverId" => [],
-                        ],
+                        "data" => [],
                         "timestamp" => "2024-02-01 16:25:31",
                         "ipay_uuid" =>"h0069b3b2ef2-a9df-4597-9a5e-e9bc5dda732d-ulq6CLUwhQgC",
                         "orderid" => null,
@@ -677,7 +694,9 @@ class IndoResHelper
                     "code" => 200,
                 ];
             } else {
-                return $result = [];
+                return $result = ["response" => [],
+                "error" => "",
+                "code" => 200,];
             }
         } elseif ($value == "serviceCharge") {
             if ($mockmodestatus == "SUCCESS") {
@@ -709,7 +728,7 @@ class IndoResHelper
                     "response" => [
                         "statuscode" => "ERR",
                         "actcode" => null,
-                        "status" => "The selected paymentMode is invalid.",
+                        "status" => "The Service Charge Not Fetched",
                         "data" => null,
                         "timestamp" => "2024-02-0116:28:37",
                         "ipay_uuid" =>"h0059b3b3010-38f0-4d6b-9453-1d629796caa7-cdZy7j8DQacJ",
@@ -721,7 +740,9 @@ class IndoResHelper
                     "code" => 200,
                 ];
             } else {
-                return $result = [];
+                return $result = ["response" => [],
+                "error" => "",
+                "code" => 200,];
             }
         } elseif ($value == "fundTransfer") {
             if ($mockmodestatus == "SUCCESS") {
@@ -836,7 +857,9 @@ class IndoResHelper
                     "code" => 200,
                 ];
             } else {
-                return $result = [];
+                return $result = ["response" => [],
+                "error" => "",
+                "code" => 200,];
             }
         } elseif ($value == "fetchTransactionStatus") {
             if ($mockmodestatus == "SUCCESS") {
@@ -887,10 +910,14 @@ class IndoResHelper
                     "code" => 200,
                 ];
             } else {
-                return $result = [];
+                return $result = ["response" => [],
+                "error" => "",
+                "code" => 200,];
             }
         } else {
-            return $result = [];
+            return $result = ["response" => [],
+            "error" => "",
+            "code" => 200,];
         }
     }
 }
