@@ -811,7 +811,7 @@ class IndoNepalApiDmtController extends Controller
          }
         
         if($result['apistatus'] == 'RIMITTER_INITIATE_SUCCESSFUL'){ 
-            $updateRemitterReport=IndoNepalRemitters::where('remitter_id',$request->remitterId)->where('user_id',\Auth::id())
+            $updateRemitterReport=IndoNepalRemitters::where('remitter_id',$request->remitterId)->where('user_id',$request->user_id)
             ->update([
             'status' =>'rbl_pending',
             'apiremark'=>$result['apiremark'],
@@ -880,7 +880,7 @@ class IndoNepalApiDmtController extends Controller
         $result = \DmtApiv5::remitterEkycInitiateStatus($data, $mockmode,$validateData['mockmodestatus']);
        // dd($result);
         if($result['apistatus'] == 'EKYC_SUCCESSFUL'){ 
-            $updateRemitterReport=IndoNepalRemitters::where('remitter_id',$request->remitterId)->where('user_id',\Auth::id())
+            $updateRemitterReport=IndoNepalRemitters::where('remitter_id',$request->remitterId)->where('user_id',$request->user_id)
             ->update([
             'apiremark'=>$result['apiremark'],
             'status' =>'rbl_done'
@@ -956,14 +956,14 @@ class IndoNepalApiDmtController extends Controller
         $mockmodestatus="SUCCESS";//FAILED,PENDING
         $result = \DmtApiv5::remitterEkycProcess($data, $mockmode,$validateData['mockmodestatus']);
         if($result['apistatus'] == 'REMITTER_EKYC_SUCCESS'){
-            $updateRemitterReport=IndoNepalRemitters::where('remitter_id',$request->remitterId)->where('user_id',\Auth::id())
+            $updateRemitterReport=IndoNepalRemitters::where('remitter_id',$request->remitterId)->where('user_id',$request->user_id)
             ->update([
             'status' =>'ekyc_done',
             'rdsVer' =>$result['rdsVer']
                  ]);
         }
         else{
-            $updateRemitterReport=IndoNepalRemitters::where('remitter_id',$request->remitterId)->where('user_id',\Auth::id())
+            $updateRemitterReport=IndoNepalRemitters::where('remitter_id',$request->remitterId)->where('user_id',$request->user_id)
             ->update([
             'status' =>'ekyc_pending',
             'rdsVer' =>$result['rdsVer']
@@ -1384,7 +1384,7 @@ class IndoNepalApiDmtController extends Controller
         if($result['apistatus'] == 'TRANSFER_SUCCESSFUL'){ 
             if($result['data'])
             {
-            $updateFundTransfer=ReportDmt::where('id',$reportDmtinsertedId)->where('user_id',\Auth::id())
+            $updateFundTransfer=ReportDmt::where('id',$reportDmtinsertedId)->where('user_id',$request->user_id)
             ->update([
             'status' =>'success',
             'apiremark'=>$result['apiremark'],
@@ -1405,7 +1405,7 @@ class IndoNepalApiDmtController extends Controller
         else if($result['apistatus'] == 'TRANSFER_PENDING'){
             if($result['data'])
             {
-            $updateFundTransfer=ReportDmt::where('id',$reportDmtinsertedId)->where('user_id',\Auth::id())
+            $updateFundTransfer=ReportDmt::where('id',$reportDmtinsertedId)->where('user_id',$request->user_id)
             ->update([
             'status' =>'pending',
             'apiremark'=>$result['apiremark'],
@@ -1427,7 +1427,7 @@ class IndoNepalApiDmtController extends Controller
         else if($result['apistatus'] == 'TRANSFER_FAILED'){
             if($result['data'])
             {
-            $updateFundTransfer=ReportDmt::where('id',$reportDmtinsertedId)->where('user_id',\Auth::id())
+            $updateFundTransfer=ReportDmt::where('id',$reportDmtinsertedId)->where('user_id',$request->user_id)
             ->update([
             'status' =>'failed',
             'apiremark'=>$result['apiremark'],
@@ -1495,7 +1495,7 @@ class IndoNepalApiDmtController extends Controller
         $mockmodestatus="PENDING";//FAILED,PENDING,SUCCESS
         $result = \DmtApiv5::fetchTransactionStatus($data, $mockmode,$validateData['mockmodestatus']);
         if($result['apistatus'] == 'TRANSFER_SUCCESSFUL'){ 
-            $updateFundTransfer=ReportDmt::where('refno2',$request->ipayId)->where('user_id',\Auth::id())
+            $updateFundTransfer=ReportDmt::where('refno2',$request->ipayId)->where('user_id',$request->user_id)
             ->update([
             'status' =>'success',
             'apiremark'=>$result['apiremark'],
@@ -1510,7 +1510,7 @@ class IndoNepalApiDmtController extends Controller
             $output['data']= $result['data'];
         }
         else if($result['apistatus'] == 'TRANSFER_PENDING'){
-            $updateFundTransfer=ReportDmt::where('refno2',$request->ipayId)->where('user_id',\Auth::id())
+            $updateFundTransfer=ReportDmt::where('refno2',$request->ipayId)->where('user_id',$request->user_id)
             ->update([
             'status' =>'pending',
             'apiremark'=>$result['apiremark'],
@@ -1526,7 +1526,7 @@ class IndoNepalApiDmtController extends Controller
             $this->logAndRespond($request, $output,$apiName,$url,'200');
         }
         else if($result['apistatus'] == 'TRANSFER_FAILED'){
-            $updateFundTransfer=ReportDmt::where('refno2',$request->ipayId)->where('user_id',\Auth::id())
+            $updateFundTransfer=ReportDmt::where('refno2',$request->ipayId)->where('user_id',$request->user_id)
             ->update([
             'status' =>'failed',
             'apiremark'=>$result['apiremark'],
@@ -1542,7 +1542,7 @@ class IndoNepalApiDmtController extends Controller
             $this->logAndRespond($request, $output,$apiName,$url,'200');
         }
         else {
-            $updateFundTransfer=ReportDmt::where('refno2',$request->ipayId)->where('user_id',\Auth::id())
+            $updateFundTransfer=ReportDmt::where('refno2',$request->ipayId)->where('user_id',$request->user_id)
             ->update([
             'status' =>'failed',
             'apiremark'=>$result['apiremark'],

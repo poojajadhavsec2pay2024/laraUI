@@ -1031,7 +1031,7 @@ class DMTV5Helper {
                 $resMessage=json_decode($result['response']);
                 $output["status"]="success";
                 $output['apistatus']='FETCH_DATA_PENDING';
-                $output["message"]="External API call failed with ".$result["code"].'( ' .$resMessage->status.')';
+                $output["message"]="External API call failed with ".$result["code"].'( ' .$resMessage->message.')';
                 $output['apiremark']=$output["message"];
                 $output["code"]=$result["code"]; 
                 $output['rdsVer']=$biometricData["rdsVer"];
