@@ -272,7 +272,7 @@ class DMTV5Controller extends Controller
                 'operation' => 'required|in:FUND_TRANSFER,REMITTER_REGISTRATION', // operation must be one of these values
                 'mobile' => 'required|numeric|digits:10', // mobile must be numeric and exactly 10 digits long
                 'paymentMode' => 'required|in:Cash Payment,Account Deposit', // paymentMode must be one of these values
-                'beneficiaryId' => 'required|exists:beneficiaries,id', // beneficiaryId must exist in the beneficiaries table's id column
+                'beneficiaryId' => 'required||numeric', // beneficiaryId must exist in the beneficiaries table's id column
                 'transferAmount' => 'required|numeric|min:0', // transferAmount must be a non-negative numeric value
             );
         }else{
@@ -282,7 +282,9 @@ class DMTV5Controller extends Controller
                 'mobile' => 'required|numeric|digits:10', // mobile must be numeric and exactly 10 digits long
              
                 );
-                $validator = \Validator::make($request->all(),$rules);
+                
+        }
+        $validator = \Validator::make($request->all(),$rules);
         if($validator->fails()){
          foreach($validator->errors()->messages() as $key => $value){
              $error = $value[0];
@@ -290,8 +292,6 @@ class DMTV5Controller extends Controller
          return response()->json(['status' => 'failed','message' => $error, 'act'=>'RETRY'], 400);
         }
        
-
-        }
         $data['api']="indonepalsendOtp";
         $data["via"]="web";
         $data["operation"]=$request->operation;/*FundTransfer,RemitterRegistration*/
@@ -350,9 +350,9 @@ class DMTV5Controller extends Controller
             'idType' => 'required|string|max:50',
             'idNumber' => 'required',
             'incomeSource' => 'required|string|max:50',
-            'remitterType' => 'required|string|max:50',
-            'incomeSourceType' => 'required|string|max:50',
-            'annualIncome' => 'required',
+            'remitterType' => 'required|numeric|in:1,2,3,4',
+            'incomeSourceType' => 'required|numeric|in:1,2,3,4,5,6',
+            'annualIncome' => 'required|numeric|in:1,2,3,4',
             'otpReference' => 'required',
             //'otp' => 'required|numeric|max:6',
         );
@@ -409,7 +409,7 @@ class DMTV5Controller extends Controller
            'remitterType'=>$request->remitterType,
            'incomeSourceType'=>$request->incomeSourceType,
            'annualIncome'=>$request->annualIncome,
-           'otp'=>$request->otp,
+           'via'=>'web',
            'status'=>'Pending',
            'user_id'=>\Auth::id()
         ]);
@@ -466,7 +466,7 @@ class DMTV5Controller extends Controller
     public function remitterEkycInitiate(Request $request)
     {
 
-        sleep(3);
+        
         $rules=array( 
             'remitterId' => 'required|numeric'
          );
@@ -610,13 +610,15 @@ class DMTV5Controller extends Controller
         if($result['apistatus'] == 'REMITTER_EKYC_SUCCESS'){
             $updateRemitterReport=IndoNepalRemitters::where('remitter_id',$request->remitterId)->where('user_id',\Auth::id())
             ->update([
-            'status' =>'ekyc_done'
+            'status' =>'ekyc_done',
+            'rdsVer' =>$result['rdsVer']
                  ]);
         }
         else{
             $updateRemitterReport=IndoNepalRemitters::where('remitter_id',$request->remitterId)->where('user_id',\Auth::id())
             ->update([
-            'status' =>'ekyc_pending'
+            'status' =>'ekyc_pending',
+            'rdsVer' =>$result['rdsVer']
                  ]);
         }
        
@@ -685,7 +687,11 @@ class DMTV5Controller extends Controller
     public function beneficiaryRegistration(Request $request)
     {
         
-        $rules=array(
+       
+        if($request->operation=='Account Deposit')
+            {
+               
+           $rules=array(
             'remitterMobile' => 'required|numeric|digits:10', // Assuming mobile numbers are strings and maximum length is 15
             'b_name' => 'required|string|max:255', // Assuming beneficiary name is a string with a maximum length of 255 characters
             'gender' => 'required|in:Female,Male,Other', // Assuming gender must be one of these values
@@ -693,8 +699,24 @@ class DMTV5Controller extends Controller
             'relationship' => 'required|string|max:255', // Assuming relationship is a string with a maximum length of 255 characters
             'address' => 'required|string|max:255', // Assuming address is a string with a maximum length of 255 characters
             'paymentMode' => 'required|in:Cash Payment,Account Deposit', // Assuming payment mode is a string with a maximum length of 255 characters
-            'bankBranchId' => 'required|numeric', // Assuming bank branch ID is a numeric value
-        );
+            'bankBranchId' => 'required|numeric',
+            'accountno'=> 'required|numeric', // Assuming bank branch ID is a numeric value
+            );
+           
+        }else{
+           
+            $rules=array(
+                'remitterMobile' => 'required|numeric|digits:10', // Assuming mobile numbers are strings and maximum length is 15
+                'b_name' => 'required|string|max:255', // Assuming beneficiary name is a string with a maximum length of 255 characters
+                'gender' => 'required|in:Female,Male,Other', // Assuming gender must be one of these values
+                'b_mobile' => 'required|numeric|digits:10', // Assuming mobile numbers are strings and maximum length is 15
+                'relationship' => 'required|string|max:255', // Assuming relationship is a string with a maximum length of 255 characters
+                'address' => 'required|string|max:255', // Assuming address is a string with a maximum length of 255 characters
+                'paymentMode' => 'required|in:Cash Payment,Account Deposit', // Assuming payment mode is a string with a maximum length of 255 characters
+                'bankBranchId' => 'required|numeric', // Assuming bank branch ID is a numeric value
+            );
+               
+           }
         $validator = \Validator::make($request->all(),$rules);
         if($validator->fails()){
          foreach($validator->errors()->messages() as $key => $value){
@@ -748,6 +770,7 @@ class DMTV5Controller extends Controller
     }
     public function serviceCharge(Request $request)
     {
+        
         $data['api']="indonepalserviceCharge";
         $data["via"]="web";
         $data["country"]=$request->country;
@@ -859,6 +882,8 @@ class DMTV5Controller extends Controller
         $result = \DmtApiv5::fundTransfer($data, $mockmode,$mockmodestatus);
         
         if($result['apistatus'] == 'TRANSFER_SUCCESSFUL'){ 
+            if($result['data'])
+            {
             $updateFundTransfer=ReportDmt::where('id',$reportDmtinsertedId)->where('user_id',\Auth::id())
             ->update([
             'status' =>'success',
@@ -866,6 +891,7 @@ class DMTV5Controller extends Controller
             'refno'=>$result['data']->txnReferenceId,
             'refno2'=>$result['data']->poolReferenceId
                  ]);
+                }
             $output['status'] = "success";
             $output['act'] = "CONTINUE";
             $output['apistatus']=$result['apistatus'];
@@ -877,6 +903,8 @@ class DMTV5Controller extends Controller
             $output['data']= $result['data'];
         }
         else if($result['apistatus'] == 'TRANSFER_PENDING'){
+            if($result['data'])
+            {
             $updateFundTransfer=ReportDmt::where('id',$reportDmtinsertedId)->where('user_id',\Auth::id())
             ->update([
             'status' =>'pending',
@@ -884,6 +912,7 @@ class DMTV5Controller extends Controller
             'refno'=>$result['data']->txnReferenceId,
             'refno2'=>$result['data']->poolReferenceId
                  ]);
+            }
             $output['status'] = "success";
             $output['act'] = "TERMINATE";
             $output['apistatus']=$result['apistatus'];
@@ -896,6 +925,8 @@ class DMTV5Controller extends Controller
            
         }
         else if($result['apistatus'] == 'TRANSFER_FAILED'){
+            if($result['data'])
+            {
             $updateFundTransfer=ReportDmt::where('id',$reportDmtinsertedId)->where('user_id',\Auth::id())
             ->update([
             'status' =>'failed',
@@ -903,6 +934,7 @@ class DMTV5Controller extends Controller
             'refno'=>$result['data']->txnReferenceId,
             'refno2'=>$result['data']->poolReferenceId
                  ]);
+                }
             $output['status'] = "success";
             $output['act'] = "RETRY";
             $output['apistatus']=$result['apistatus'];
@@ -915,13 +947,7 @@ class DMTV5Controller extends Controller
            
         }
         else {
-            $updateFundTransfer=ReportDmt::where('id',$reportDmtinsertedId)->where('user_id',\Auth::id())
-            ->update([
-            'status' =>'failed',
-            'apiremark'=>$result['apiremark'],
-            'refno'=>$result['data']->txnReferenceId,
-            'refno2'=>$result['data']->poolReferenceId
-                 ]);
+          
             $output['status'] = "failed";
             $output['act'] = "TERMINATE";
             $output['apistatus']='API_CALLFAILED';

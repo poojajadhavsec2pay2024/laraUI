@@ -23,33 +23,42 @@ class IndoNepalApiDmtController extends Controller
     public static function checkIndonepalAuth(Request $request)
     {
 
-                        
+                        //dd($request->all());
                     $userId = $request->user_id;
-                    $user = ApiTokens::where('user_id',$userId)->first();
+                    $user = ApiTokens::where('user_id',$userId)->where('token',$request->token)->first();
                    
-                   // dd($request->token);
+                   
                     if (!$user || $user->token !== $request->token) {
                         $output["status"]="error";
                         $output['apistatus']='AUTHENTICATION_FAILED';
                         $output["message"]= "User Not Found!";
-                        $output["code"]= "401";
                         $output['apiremark']= $output['message'];
 
                         return $output;
-                        //return response()->json($output,401);
-                        
+                       
                     }
-                    //dd($request->ip());
-                    if ($user->ip1 !== $request->ip()) {
+                    if($request->mockmodestatus)
+                    {
+                    $output["mockmodestatus"]=$request->mockmodestatus;
+                    }else{
+                      $output["mockmodestatus"]="SUCCESS";
+                    }
+                  if($user->mockmode == $request->environmentmode && $request->environmentmode!='uat')
+                  {
+                    
+                    if ($user->ip1 === $request->ip() || $user->ip2 === $request->ip()) {
+                        
+                      }
+                    else{
                         $output["status"]="error";
                         $output['apistatus']='AUTHENTICATION_FAILED';
                         $output["message"]= "Please Whiteleast the ip address !";
                         $output["code"]= "400";
                         $output['apiremark']= $output['message'];
-                        
                         return $output;
-                       // return response()->json(['status' => 'error', 'message' => 'Please Whiteleast the ip address !'], 401);
+                      
                     }
+                }
                     
                     if ($user->status !== 'active') {
                         $output["status"]="error";
@@ -89,7 +98,7 @@ class IndoNepalApiDmtController extends Controller
         $mockmode = false;
         $mockmodestatus="SUCCESS";//FAILED,PENDING
 
-        $result = \DmtApiv5::getOutletDetails($data, $mockmode,$mockmodestatus);
+        $result = \DmtApiv5::getOutletDetails($data, $mockmode,$validateData['mockmodestatus']);
         dd($result);
     
     }
@@ -103,7 +112,7 @@ class IndoNepalApiDmtController extends Controller
         $data['hash']=$request->hash;
         $mockmode = false;
         $mockmodestatus="SUCCESS";//FAILED,PENDING
-      $result = \DmtApiv5::validateoutletdetails($data, $mockmode,$mockmodestatus);
+      $result = \DmtApiv5::validateoutletdetails($data, $mockmode,$validateData['mockmodestatus']);
     
         dd($result);
     
@@ -119,7 +128,7 @@ class IndoNepalApiDmtController extends Controller
         $mockmode = false;
         $mockmodestatus="SUCCESS";//FAILED,PENDING
 
-        $result = \DmtApiv5::validateoutletdetails($data, $mockmode,$mockmodestatus);
+        $result = \DmtApiv5::validateoutletdetails($data, $mockmode,$validateData['mockmodestatus']);
         dd($result);
     
     }
@@ -134,7 +143,7 @@ class IndoNepalApiDmtController extends Controller
           foreach($validator->errors()->messages() as $key => $value){
               $error = $value[0];
           }
-          return response()->json(['status' => 'failed','message' => $error, 'act'=>'RETRY'], 400);
+          return response()->json(['status' => 'failed','message' => $error], 400);
          }
         $data['api']="indonepalactivationStatus";
         $data["via"]="api";
@@ -142,7 +151,7 @@ class IndoNepalApiDmtController extends Controller
         $mockmode = false;
         $mockmodestatus="SUCCESS";//FAILED,PENDING
          //dd($data);
-        $result = \DmtApiv5::activationStatus($data, $mockmode,$mockmodestatus);
+        $result = \DmtApiv5::activationStatus($data, $mockmode,$validateData['mockmodestatus']);
         dd($result);
     
     }
@@ -154,12 +163,12 @@ class IndoNepalApiDmtController extends Controller
         $apiName= end($uriSegments);
         
 
-            $indonepalData=self::checkIndonepalAuth($request);
-            //dd($indonepalData);
-            if($indonepalData["status"]!="success"){
+            $validateData=self::checkIndonepalAuth($request);
+           
+            if($validateData["status"]!="success"){
 
-                $this->logAndRespond($request, $indonepalData,$apiName,$url,'400');
-                return response()->json(['status' => 'failed','message' => $indonepalData['message'], 'act'=>'RETRY'], 400);
+                $this->logAndRespond($request, $validateData,$apiName,$url,'400');
+                return response()->json(['status' => 'failed','message' => $validateData['message']], 400);
             }
             
             
@@ -175,11 +184,11 @@ class IndoNepalApiDmtController extends Controller
             $output["status"]="failed";
             $output['apistatus']='VALIDATION_FAILED';
             $output["message"]= $error;
-            $output["code"]= "400";
+            $output["code"]= "200";
             $output['apiremark']= $output['message'];
                         
-            $this->logAndRespond($request, $output,$apiName,$url,'400');
-          return response()->json(['status' => 'failed','message' => $error, 'act'=>'RETRY'], 400);
+            $this->logAndRespond($request, $output,$apiName,$url,'200');
+          return response()->json($output, 200);
          }
          
         
@@ -187,14 +196,14 @@ class IndoNepalApiDmtController extends Controller
         $data["via"]="api";
         $data['type']=$request->type;
         $mockmode = false;
+        
         $mockmodestatus="SUCCESS";//FAILED,PENDING
         /*Available Types are :Gender, Nationality, IDType, IncomeSource, Relationship, PaymentMode, RemittanceReason*/
 
-        $result = \DmtApiv5::staticData($data, $mockmode,$mockmodestatus);
+        $result = \DmtApiv5::staticData($data, $mockmode,$validateData['mockmodestatus']);
 
         if($result['apistatus'] == 'DATA_FETCHED_SUCCESSFULLY'){
             $output['status'] = "success";
-            $output['act'] = "CONTINUE";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
             $output['message'] = "Static Data List Fetch successfully";
@@ -205,7 +214,6 @@ class IndoNepalApiDmtController extends Controller
         }
         else if($result['apistatus'] == 'DATA_FETCH_FAILED'){
             $output['status'] = "success";
-            $output['act'] = "RETRY";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
             $output['message'] = "Unable to fetch the Static Data list";
@@ -214,7 +222,6 @@ class IndoNepalApiDmtController extends Controller
            
         }else {
             $output['status'] = "failed";
-            $output['act'] = "TERMINATE";
             $output['apistatus']='API_CALLFAILED';
             $output['message']= "Unknown resposne received. Please try again";
              $this->logAndRespond($request, $output,$apiName,$url,'200');
@@ -229,15 +236,16 @@ class IndoNepalApiDmtController extends Controller
             $uriSegments = explode('/', $url);
             $uriSegments = array_filter($uriSegments);
             $apiName= end($uriSegments);
-            $indonepalData=self::checkIndonepalAuth($request);
-            //dd($indonepalData);
-            if($indonepalData["status"]!="success"){
+            $validateData=self::checkIndonepalAuth($request);
+           
+            if($validateData["status"]!="success"){
 
-                $this->logAndRespond($request, $indonepalData,$apiName,$url,'400');
-                return response()->json(['status' => 'failed','message' => $indonepalData['message'], 'act'=>'RETRY'], 400);
+                $this->logAndRespond($request, $validateData,$apiName,$url,'200');
+                return response()->json(['status' => 'failed','message' => $validateData['message']], 200);
             }
             $rules=array(
                 'paymentMode' => 'required|string',
+                'country' => 'required|string',
                 'state' => 'required|string',
                 'district' => 'required|string'
             );
@@ -249,11 +257,11 @@ class IndoNepalApiDmtController extends Controller
             $output["status"]="failed";
             $output['apistatus']='VALIDATION_FAILED';
             $output["message"]= $error;
-            $output["code"]= "400";
+            $output["code"]= "200";
             $output['apiremark']= $output['message'];           
-            $this->logAndRespond($request, $output,$apiName,$url,'400');
+            $this->logAndRespond($request, $output,$apiName,$url,'200');
         
-          return response()->json(['status' => 'failed','message' => $error, 'act'=>'RETRY'], 400);
+          return response()->json($output, 200);
          }
         $data['api']="indonepalmentLocationList";
         $data["via"]="api";
@@ -269,10 +277,9 @@ class IndoNepalApiDmtController extends Controller
         $mockmode = false;
         $mockmodestatus="SUCCESS";//FAILED,PENDING
 
-        $result = \DmtApiv5::paymentLocationList($data, $mockmode,$mockmodestatus);
+        $result = \DmtApiv5::paymentLocationList($data, $mockmode,$validateData['mockmodestatus']);
         if($result['apistatus'] == 'LOCATION_FETCHED_SUCCFULLY'){
             $output['status'] = "success";
-            $output['act'] = "CONTINUE";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
             $output['message'] = "Payment Location List Fetch successfully";
@@ -282,7 +289,6 @@ class IndoNepalApiDmtController extends Controller
         }
         else if($result['apistatus'] == 'LOCATION_FETCH_FAILED'){
             $output['status'] = "success";
-            $output['act'] = "RETRY";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
             $output['message'] = "Unable to fetch the payment location list";
@@ -290,11 +296,11 @@ class IndoNepalApiDmtController extends Controller
             $this->logAndRespond($request, $output,$apiName,$url,'200');
         }else {
             $output['status'] = "failed";
-            $output['act'] = "TERMINATE";
+            
             $output['apistatus']='API_CALLFAILED';
             $output['message']= "Unknown resposne received. Please try again";
-           // return response()->json($output,400);
-            $this->logAndRespond($request, $output,$apiName,$url,'400');
+           // return response()->json($output,200);
+            $this->logAndRespond($request, $output,$apiName,$url,'200');
         }
 
         return response()->json($output,200);
@@ -307,12 +313,12 @@ class IndoNepalApiDmtController extends Controller
         $uriSegments = explode('/', $url);
         $uriSegments = array_filter($uriSegments);
         $apiName= end($uriSegments);
-        $indonepalData=self::checkIndonepalAuth($request);
-        //dd($indonepalData);
-        if($indonepalData["status"]!="success"){
+        $validateData=self::checkIndonepalAuth($request);
+       
+        if($validateData["status"]!="success"){
 
-            $this->logAndRespond($request, $indonepalData,$apiName,$url,'400');
-            return response()->json(['status' => 'failed','message' => $indonepalData['message'], 'act'=>'RETRY'], 400);
+            $this->logAndRespond($request, $validateData,$apiName,$url,'200');
+            return response()->json(['status' => 'failed','message' => $validateData['message']], 200);
         }
         $rules=array(
             'country' => 'required|string'
@@ -322,13 +328,13 @@ class IndoNepalApiDmtController extends Controller
          foreach($validator->errors()->messages() as $key => $value){
              $error = $value[0];
          }
-         $output["status"]="failed";
+            $output["status"]="failed";
             $output['apistatus']='VALIDATION_FAILED';
             $output["message"]= $error;
-            $output["code"]= "400";
+            $output["code"]= "200";
             $output['apiremark']= $output['message'];           
-            $this->logAndRespond($request, $output,$apiName,$url,'400');
-         return response()->json(['status' => 'failed','message' => $error, 'act'=>'RETRY'], 400);
+            $this->logAndRespond($request, $output,$apiName,$url,'200');
+         return response()->json($output, 200);
         }
         $data['api']="indonepalstateDistrict";
         $data["via"]="api";
@@ -336,25 +342,24 @@ class IndoNepalApiDmtController extends Controller
         $mockmode = false;
         $mockmodestatus="SUCCESS";//FAILED,PENDING
 
-        $result = \DmtApiv5::stateDistrict($data, $mockmode,$mockmodestatus);
-       // dd($result['data'][0]->state);
-    //    $i=0;
-    //     foreach($result['data'] as $value)
-    //     {
-    //         //dd($value->state);
-           
-    //     //$dmt_statedistrict  = new stateDistrict();     
-    //     $dmt_statedistrict  = new nepal_stateDistrict();       
-    //     $dmt_statedistrict->state=$value->state;
-    //     $dmt_statedistrict->district = $value->district;
-    //     $dmt_statedistrict->stateCode = $value->stateCode;
-    //     $dmt_statedistrict->save();
-    //     $i++;
-    //     }
-    //     dd($result);
+        $result = \DmtApiv5::stateDistrict($data, $mockmode,$validateData['mockmodestatus']);
+        // dd($result['data'][0]->state);
+            //    $i=0;
+            //     foreach($result['data'] as $value)
+            //     {
+            //         //dd($value->state);
+                
+            //     //$dmt_statedistrict  = new stateDistrict();     
+            //     $dmt_statedistrict  = new nepal_stateDistrict();       
+            //     $dmt_statedistrict->state=$value->state;
+            //     $dmt_statedistrict->district = $value->district;
+            //     $dmt_statedistrict->stateCode = $value->stateCode;
+            //     $dmt_statedistrict->save();
+            //     $i++;
+            //     }
+            //     dd($result);
             if($result['apistatus'] == 'FETCH_DATA'){
                 $output['status'] = "success";
-                $output['act'] = "CONTINUE";
                 $output['apistatus']=$result['apistatus'];
                 $output['apiremark']=$result['apiremark'];
                 $output['message'] = "State District Data Fetch successfully";
@@ -364,7 +369,6 @@ class IndoNepalApiDmtController extends Controller
             }
             else if($result['apistatus'] == 'FETCH_DATA_FAILED'){
                 $output['status'] = "success";
-                $output['act'] = "RETRY";
                 $output['apistatus']=$result['apistatus'];
                 $output['apiremark']=$result['apiremark'];
                 $output['message'] = "Unable to fetch the State District Data";
@@ -372,14 +376,13 @@ class IndoNepalApiDmtController extends Controller
                 $this->logAndRespond($request, $output,$apiName,$url,'200');
             }else {
                 $output['status'] = "failed";
-                $output['act'] = "TERMINATE";
                 $output['apistatus']='API_CALLFAILED';
                 $output['message']= "Unknown resposne received. Please try again";
-            // return response()->json($output,400);
-                $this->logAndRespond($request, $output,$apiName,$url,'400');
+            // return response()->json($output,200);
+                $this->logAndRespond($request, $output,$apiName,$url,'200');
             }
 
-    return response()->json($output,200);
+     return response()->json($output,200);
     
     }
     public function remitterProfile(Request $request)
@@ -388,12 +391,12 @@ class IndoNepalApiDmtController extends Controller
         $uriSegments = explode('/', $url);
         $uriSegments = array_filter($uriSegments);
         $apiName= end($uriSegments);
-        $indonepalData=self::checkIndonepalAuth($request);
-        //dd($indonepalData);
-        if($indonepalData["status"]!="success"){
+        $validateData=self::checkIndonepalAuth($request);
+       
+        if($validateData["status"]!="success"){
 
-            $this->logAndRespond($request, $indonepalData,$apiName,$url,'400');
-            return response()->json(['status' => 'failed','message' => $indonepalData['message'], 'act'=>'RETRY'], 400);
+            $this->logAndRespond($request, $validateData,$apiName,$url,'200');
+            return response()->json(['status' => 'failed','message' => $validateData['message']], 200);
         }
         $rules=array(
            'mobile' => 'required|numeric|digits:10',
@@ -406,47 +409,77 @@ class IndoNepalApiDmtController extends Controller
          $output["status"]="failed";
          $output['apistatus']='VALIDATION_FAILED';
          $output["message"]= $error;
-         $output["code"]= "400";
+         $output["code"]= "200";
          $output['apiremark']= $output['message'];           
-         $this->logAndRespond($request, $output,$apiName,$url,'400');
-         return response()->json(['status' => 'failed','message' => $error, 'act'=>'RETRY'], 400);
+         $this->logAndRespond($request, $output,$apiName,$url,'200');
+         return response()->json($output, 200);
         }
         $data['api']="indonepalremitterProfile";
         $data["via"]="api";
         $data['mobile']=$request->mobile;
         $mockmode = false;
         $mockmodestatus="SUCCESS";//FAILED,PENDING
-     
-        $result = \DmtApiv5::remitterProfile($data, $mockmode,$mockmodestatus);
+
+        $remittercheck = IndoNepalRemitters::where('mobile',$request->mobile)->first();
+        if(!isset($remittercheck))
+        {
+            //dd('kkkk');
+            $output['status'] = "success";
+            $output['apistatus']='NOT_REGISTERED';
+            $output['message']="Remitter Not Found !";
+            $output['apiremark']= $output['message'];
+            $output['data'] =[];
+            $this->logAndRespond($request, $output,$apiName,$url,'200');
+            return response()->json(['status' => 'failed','message' => $output['message']], 200);
+        }
+        $result = \DmtApiv5::remitterProfile($data, $mockmode,$validateData['mockmodestatus']);
+       if(!empty($result['data']))
+       {
        
+        $remdata['id']=$result['data']->id;
+        $remdata['mobile']=$result['data']->mobile;
+        $remdata['firstName']=$result['data']->firstName;
+        $remdata['gender']=$result['data']->gender;
+        $remdata['dob']=$result['data']->dob;
+        $remdata['address']=$result['data']->address;
+        $remdata['city']=$result['data']->city;
+        $remdata['state']=$result['data']->state;
+        $remdata['district']=$result['data']->district;
+        $remdata['nationality']=$result['data']->nationality;
+        $remdata['employer']=$result['data']->employer;
+        $remdata['incomeSource']=$result['data']->incomeSource;
+        $remdata['status']=$result['data']->status;
+        $remdata['beneficiaries']=$result['data']->beneficiaries;
+        $remdata['ids']=$result['data']->ids[0];
+       
+        }else{
+            $remdata=[];
+        }
         if($result['apistatus'] == 'REGISTERED'){
             $output['status'] = "success";
-            $output['act'] = "CONTINUE";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
             $output['message'] ="Data Fetch Sucessfully";
-            $output['data']= $result['data'];
+            $output['data']= $remdata;
             Session::put('remitter_mobileNumber', $request->mobile);
-            Session::put('senderID', $result['data']->id);
+            Session::put('senderID', $remdata['id']);
             $this->logAndRespond($request, $output,$apiName,$url,'200');
             
         }
         else if($result['apistatus'] == 'NOT_REGISTERED'){
             $output['status'] = "success";
-            $output['act'] = "CONTINUE";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
             $output['message'] = "Remitter Fetch Data Failed";
-            $output['data']= $result['data'];
+            $output['data']= $remdata;
             Session::put('rem_mobileNo', $request->mobile);
             $this->logAndRespond($request, $output,$apiName,$url,'200');
             
         }else {
             $output['status'] = "failed";
-            $output['act'] = "TERMINATE";
             $output['apistatus']='API_CALLFAILED';
             $output['message']= "Unknown resposne received. Please try again";
-            $this->logAndRespond($request, $output,$apiName,$url,'400');
+            $this->logAndRespond($request, $output,$apiName,$url,'200');
 
         }
 
@@ -455,33 +488,51 @@ class IndoNepalApiDmtController extends Controller
     }
     public function sendOtp(Request $request)
     {
+       
+            $url = $request->url();
+            $uriSegments = explode('/', $url);
+            $uriSegments = array_filter($uriSegments);
+            $apiName= end($uriSegments);
+            $validateData=self::checkIndonepalAuth($request);
+           
+            if($validateData["status"]!="success"){
+
+                $this->logAndRespond($request, $validateData,$apiName,$url,'200');
+                return response()->json(['status' => 'failed','message' => $validateData['message']], 200);
+            }
+            
             if($request->operation=='FUND_TRANSFER')
             {
-           
+               
            $rules=array(
                 'operation' => 'required|in:FUND_TRANSFER,REMITTER_REGISTRATION', // operation must be one of these values
                 'mobile' => 'required|numeric|digits:10', // mobile must be numeric and exactly 10 digits long
                 'paymentMode' => 'required|in:Cash Payment,Account Deposit', // paymentMode must be one of these values
-                'beneficiaryId' => 'required|exists:beneficiaries,id', // beneficiaryId must exist in the beneficiaries table's id column
+                'beneficiaryId' => 'required|numeric', // beneficiaryId must exist in the beneficiaries table's id column
                 'transferAmount' => 'required|numeric|min:0', // transferAmount must be a non-negative numeric value
             );
+           
         }else{
            
-            $rules=array(
-                'operation' => 'required|in:FUND_TRANSFER,REMITTER_REGISTRATION', // operation must be one of these values
-                'mobile' => 'required|numeric|digits:10', // mobile must be numeric and exactly 10 digits long
-             
+                 $rules=array(
+                 'operation' => 'required|in:FUND_TRANSFER,REMITTER_REGISTRATION', // operation must be one of these values
+                 'mobile' => 'required|numeric|digits:10', // mobile must be numeric and exactly 10 digits long
+                    
                 );
-                $validator = \Validator::make($request->all(),$rules);
-        if($validator->fails()){
-         foreach($validator->errors()->messages() as $key => $value){
-             $error = $value[0];
-         }
-         return response()->json(['status' => 'failed','message' => $error, 'act'=>'RETRY'], 400);
-        }
-       
+               
+           }
+           $validator = \Validator::make($request->all(),$rules);
+          
+           if($validator->fails()){
+           
+           foreach($validator->errors()->messages() as $key => $value){
+               $error = $value[0];
+           }
+          
+           $this->logAndRespond($request, $error,$apiName,$url,'200');
+           return response()->json(['status' => 'failed','message' => $error], 200);
+           }
 
-        }
         $data['api']="indonepalsendOtp";
         $data["via"]="api";
         $data["operation"]=$request->operation;/*FundTransfer,RemitterRegistration*/
@@ -493,29 +544,35 @@ class IndoNepalApiDmtController extends Controller
         $data["transferAmount"]=$request->transferAmount;
         $mockmode = true;
         $mockmodestatus="SUCCESS";//FAILED,PENDING
-        $result = \DmtApiv5::sendOtp($data, $mockmode,$mockmodestatus);
+        $result = \DmtApiv5::sendOtp($data, $mockmode,$validateData['mockmodestatus']);
+        if(!empty($result['data']))
+       {
+        $remdata=$result['data']->otpReference;
+       }else{
+        $remdata=[];
+       }
         if($result['apistatus'] == 'OTP_SEND'){
             $output['status'] = "success";
-            $output['act'] = "CONTINUE";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
             $output['message'] = "OTP sent to remitter mobile number";
-            $output['data']= $result['data'];
+            $output['otpReference']= $remdata;
+            $this->logAndRespond($request, $output,$apiName,$url,'200');
             
         }
         else if($result['apistatus'] == 'OTP_SEND_FAILED'){
             $output['status'] = "success";
-            $output['act'] = "RETRY";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
             $output['message'] = "Could not send OTP to remitter mobile number.";
-            $output['data']= $result['data'];
+            $output['otpReference']= $remdata;
+            $this->logAndRespond($request, $output,$apiName,$url,'200');
         }else {
             $output['status'] = "failed";
-            $output['act'] = "TERMINATE";
             $output['apistatus']='API_CALLFAILED';
             $output['message']= "Unknown resposne received. Please try again";
-            return response()->json($output,400);
+           
+            $this->logAndRespond($request, $output,$apiName,$url,'200');
         }
 
         return response()->json($output,200);
@@ -524,7 +581,17 @@ class IndoNepalApiDmtController extends Controller
     }
     public function remitterRegistration(Request $request)
     {
-       //dd($request->dob);
+        $url = $request->url();
+        $uriSegments = explode('/', $url);
+        $uriSegments = array_filter($uriSegments);
+        $apiName= end($uriSegments);
+        $validateData=self::checkIndonepalAuth($request);
+       
+        if($validateData["status"]!="success"){
+
+            $this->logAndRespond($request, $validateData,$apiName,$url,'200');
+            return response()->json(['status' => 'failed','message' => $validateData['message']], 200);
+        }
         $rules=array(
             'name' => 'required|string|max:32',
             'gender' => 'required|in:Female,Male,Other',
@@ -540,19 +607,23 @@ class IndoNepalApiDmtController extends Controller
             'idType' => 'required|string|max:50',
             'idNumber' => 'required',
             'incomeSource' => 'required|string|max:50',
-            'remitterType' => 'required|string|max:50',
-            'incomeSourceType' => 'required|string|max:50',
-            'annualIncome' => 'required',
+            'remitterType' => 'required|numeric|in:1,2,3,4',
+            'incomeSourceType' => 'required|numeric|in:1,2,3,4,5,6',
+            'annualIncome' => 'required|numeric|in:1,2,3,4',
             'otpReference' => 'required',
             //'otp' => 'required|numeric|max:6',
         );
         $validator = \Validator::make($request->all(),$rules);
-        if($validator->fails()){
-         foreach($validator->errors()->messages() as $key => $value){
-             $error = $value[0];
-         }
-         return response()->json(['status' => 'failed','message' => $error, 'act'=>'RETRY'], 400);
-        }
+          
+           if($validator->fails()){
+           
+           foreach($validator->errors()->messages() as $key => $value){
+               $error = $value[0];
+           }
+          
+           $this->logAndRespond($request, $error,$apiName,$url,'200');
+           return response()->json(['status' => 'failed','message' => $error], 200);
+           }
         
         $data['api']="indonepalremitterRegistration";
         $data["via"]="api";
@@ -579,33 +650,67 @@ class IndoNepalApiDmtController extends Controller
         $data["otp"] =$request->otp;    
         $mockmode = true;
         $mockmodestatus="SUCCESS";//FAILED,PENDING
+        $remittercheck = IndoNepalRemitters::where('mobile',$request->mobileno)->first();
+        if(isset($remittercheck))
+        {
+            //dd('kkkk');
+            $output['status'] = "success";
+            $output['apistatus']='NOT_REGISTERED';
+            $output['message']="Remitter already Registered !";
+            $output['apiremark']= $output['message'];
+           
+            $this->logAndRespond($request, $output,$apiName,$url,'200');
+            return response()->json($output, 200);
+        }
+        $create['name']=$request->name;
+        $create['gender']=$request->gender;
+        $create['dob']=$request->dob;
+        $create['address']=$request->address;
+        $create['mobile']=$request->mobileno;
+        $create['state']=$request->state;
+        $create['district']=$request->district;
+        $create['city']=$request->city;
+        $create['nationality']=$request->nationality;
+        $create['email']=$request->email;
+        $create['employer']=$request->employer;
+        $create['idType']=$request->idType;
+        $create['idNumber']=$request->idNumber;
+        $create['idExpiryDate']=$request->idExpiryDate;
+        $create['idIssuedPlace']=$request->idIssuedPlace;
+        $create['incomeSource']=$request->incomeSource;
+        $create['remitterType']=$request->remitterType;
+        $create['incomeSourceType']=$request->incomeSourceType;
+        $create['annualIncome']=$request->annualIncome;
+        $create['via']='api';
+        $create['status']='Pending';
+        $create['user_id']=$request->user_id;
+     
+        $instantPay_RemitterReport =IndoNepalRemitters::create($create);
 
-        $instantPay_RemitterReport =IndoNepalRemitters::create(['name'=>$request->name,
-           'gender'=>$request->gender,
-           'dob'=>$request->dob,
-           'address'=>$request->address,
-           'mobile'=>$request->mobileno,
-           'state'=>$request->state,
-           'district'=>$request->district,
-           'city'=>$request->city,
-           'nationality'=>$request->nationality,
-           'email'=>$request->email,
-           'employer'=>$request->employer,
-           'idType'=>$request->idType,
-           'idNumber'=>$request->idNumber,
-           'idExpiryDate'=>$request->idExpiryDate,
-           'idIssuedPlace'=>$request->idIssuedPlace,
-           'incomeSource'=>$request->incomeSource,
-           'remitterType'=>$request->remitterType,
-           'incomeSourceType'=>$request->incomeSourceType,
-           'annualIncome'=>$request->annualIncome,
-           'otp'=>$request->otp,
-           'status'=>'Pending',
-           'user_id'=>\Auth::id()
-        ]);
             $insertedId = $instantPay_RemitterReport->id;
-        $result = \DmtApiv5::remitterRegistration($data, $mockmode,$mockmodestatus);
-
+        $result = \DmtApiv5::remitterRegistration($data, $mockmode,$validateData['mockmodestatus']);
+        if(!empty($result['data']))
+        {
+        
+         $remdata['id']=$result['data']->id;
+         $remdata['mobile']=$result['data']->mobile;
+         $remdata['firstName']=$result['data']->firstName;
+         $remdata['gender']=$result['data']->gender;
+         $remdata['dob']=$result['data']->dob;
+         $remdata['address']=$result['data']->address;
+         $remdata['city']=$result['data']->city;
+         $remdata['state']=$result['data']->state;
+         $remdata['district']=$result['data']->district;
+         $remdata['nationality']=$result['data']->nationality;
+         $remdata['employer']=$result['data']->employer;
+         $remdata['incomeSource']=$result['data']->incomeSource;
+         $remdata['status']=$result['data']->status;
+         $remdata['beneficiaries']=$result['data']->beneficiaries;
+         $remdata['ids']=$result['data']->ids[0];
+        
+         }else{
+             $remdata=[];
+         }
         if($result['apistatus'] == 'REGISTRATION_SUCCESSFUL'){
 
             $updateRemitterReport=IndoNepalRemitters::where('id',$insertedId)
@@ -616,47 +721,56 @@ class IndoNepalApiDmtController extends Controller
                  ]);
             //$updateRemitterReport->status = "Registered";
             $output['status'] = "success";
-            $output['act'] = "CONTINUE";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
             $output['message'] = "Remitter registration successful";
-            $output['data']= $result['data'];
+            $output['data']= $remdata;
             Session::put('rem_mobileNo', $result['data']->mobile);
-            Session::put('senderID', $result['data']->id);
+            Session::put('senderID', $remdata['id']);
+            $this->logAndRespond($request, $output,$apiName,$url,'200');
             
         }
         else if($result['apistatus'] == 'REGISTRATION_INPROCESS'){
            
             $output['status'] = "success";
-            $output['act'] = "RETRY";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
             $output['message'] = "Remitter registration is pending";
             $output['data']= $result['data'];
+            $this->logAndRespond($request, $output,$apiName,$url,'200');
         }
         else if($result['apistatus'] == 'REGISTRATION_INVALID_INPUT'){
            
             $output['status'] = "success";
-            $output['act'] = "RETRY";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
             $output['message'] = $result['message'];
             $output['data']= $result['data'];
+            $this->logAndRespond($request, $output,$apiName,$url,'200');
         }else {
            
             $output['status'] = "failed";
-            $output['act'] = "TERMINATE";
             $output['apistatus']='API_CALLFAILED';
             $output['message']= "Unknown resposne received. Please try again";
-            return response()->json($output,400);
+            $this->logAndRespond($request, $output,$apiName,$url,'200');
         }
+        
         return response()->json($output,200);
-    
     }
     public function remitterEkycInitiate(Request $request)
     {
 
-        sleep(3);
+        $url = $request->url();
+        $uriSegments = explode('/', $url);
+        $uriSegments = array_filter($uriSegments);
+        $apiName= end($uriSegments);
+        $validateData=self::checkIndonepalAuth($request);
+       
+        if($validateData["status"]!="success"){
+
+            $this->logAndRespond($request, $validateData,$apiName,$url,'200');
+            return response()->json(['status' => 'failed','message' => $validateData['message'], ], 200);
+        }
         $rules=array( 
             'remitterId' => 'required|numeric'
          );
@@ -665,14 +779,36 @@ class IndoNepalApiDmtController extends Controller
           foreach($validator->errors()->messages() as $key => $value){
               $error = $value[0];
           }
-          return response()->json(['status' => 'failed','message' => $error, 'act'=>'RETRY'], 400);
+          $this->logAndRespond($request, $error,$apiName,$url,'200');
+          return response()->json(['status' => 'failed','message' => $error ], 200);
          }
+         $remittercheck = IndoNepalRemitters::where('remitter_id',$request->remitterId)->first();
+        if(!isset($remittercheck))
+        {
+            //dd('kkkk');
+            $output['status'] = "success";
+            $output['apistatus']='REMITTER_NOT_FOUND';
+            $output['message']="Remitter Not Found!";
+            $output['apiremark']= $output['message'];
+           
+            $this->logAndRespond($request, $output,$apiName,$url,'200');
+            return response()->json($output, 200);
+        }
         $data['api']="indonepalremitterEkycInitiate";
         $data["via"]="api";
         $data["remitterId"] =$request->remitterId;
          $mockmode = true;
-        $mockmodestatus="SUCCESS";//FAILED,PENDING
-        $result = \DmtApiv5::remitterEkycInitiate($data, $mockmode,$mockmodestatus);
+        $mockmodestatus="SUCCESS";//FAILED,PENDING,SUCCESS
+        $result = \DmtApiv5::remitterEkycInitiate($data, $mockmode,$validateData['mockmodestatus']);
+        if(!empty($result['data']))
+        {
+        
+         $remdata['referenceKey']=$result['data']->referenceKey;
+         $remdata['url']=$result['data']->url;
+         }else{
+            $remdata['referenceKey']=[];
+            $remdata['url']=[];
+         }
         
         if($result['apistatus'] == 'RIMITTER_INITIATE_SUCCESSFUL'){ 
             $updateRemitterReport=IndoNepalRemitters::where('remitter_id',$request->remitterId)->where('user_id',\Auth::id())
@@ -682,34 +818,46 @@ class IndoNepalApiDmtController extends Controller
             'referenceKey'=>$result['data']->referenceKey
                  ]);
             $output['status'] = "success";
-            $output['act'] = "CONTINUE";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
             $output['message'] = "Remitter Ekyc Initiate Succesfully";
-            $output['data']= $result['data'];
+            $output['referenceKey']= $remdata['referenceKey'];
+            $output['url']= $remdata['url'];
             Session::put('referenceKey', $result['data']->referenceKey);
-           
+            $this->logAndRespond($request, $output,$apiName,$url,'200');
             
         }
         else if($result['apistatus'] == 'REMITTER_INITIATE_FAILED'){
             $output['status'] = "success";
-            $output['act'] = "RETRY";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
             $output['message'] = "Failed to Initiate Remitter Ekyc please try again";;
-            $output['data']= $result['data'];
+            $output['referenceKey']= $remdata['referenceKey'];
+            $output['url']= $remdata['url'];
+            $this->logAndRespond($request, $output,$apiName,$url,'200');
         }else {
             $output['status'] = "failed";
-            $output['act'] = "TERMINATE";
             $output['apistatus']='API_CALLFAILED';
             $output['message']= "Unknown resposne received. Please try again";
-            return response()->json($output,400);
+           
+            $this->logAndRespond($request, $output,$apiName,$url,'200');
         }
         return response()->json($output,200);
     
     }
     public function remitterEkycInitiateStatus(Request $request)
     {
+        $url = $request->url();
+        $uriSegments = explode('/', $url);
+        $uriSegments = array_filter($uriSegments);
+        $apiName= end($uriSegments);
+        $validateData=self::checkIndonepalAuth($request);
+       
+        if($validateData["status"]!="success"){
+
+            $this->logAndRespond($request, $validateData,$apiName,$url,'200');
+            return response()->json(['status' => 'failed','message' => $validateData['message']], 200);
+        }
         $rules=array(
             'remitterId' => 'required|numeric',
             'referenceKey' => 'required|string|max:255'
@@ -719,7 +867,8 @@ class IndoNepalApiDmtController extends Controller
           foreach($validator->errors()->messages() as $key => $value){
               $error = $value[0];
           }
-          return response()->json(['status' => 'failed','message' => $error, 'act'=>'RETRY'], 400);
+          $this->logAndRespond($request, $error,$apiName,$url,'200');
+          return response()->json(['status' => 'failed','message' => $error], 200);
          }
         $data['api']="indonepalremitterEkycInitiateStatus";
         $data["via"]="api";
@@ -728,7 +877,7 @@ class IndoNepalApiDmtController extends Controller
        
         $mockmode = true;
         $mockmodestatus="SUCCESS";//FAILED,PENDING
-        $result = \DmtApiv5::remitterEkycInitiateStatus($data, $mockmode,$mockmodestatus);
+        $result = \DmtApiv5::remitterEkycInitiateStatus($data, $mockmode,$validateData['mockmodestatus']);
        // dd($result);
         if($result['apistatus'] == 'EKYC_SUCCESSFUL'){ 
             $updateRemitterReport=IndoNepalRemitters::where('remitter_id',$request->remitterId)->where('user_id',\Auth::id())
@@ -737,43 +886,51 @@ class IndoNepalApiDmtController extends Controller
             'status' =>'rbl_done'
                  ]);
             $output['status'] = "success";
-            $output['act'] = "CONTINUE";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
             $output['message'] = $result['message'];
             $output['data']= $result['data'];
-           
+            $this->logAndRespond($request, $output,$apiName,$url,'200');
             
         }
         else if($result['apistatus'] == 'EKYC_UNDER_PROCESS'){
             $output['status'] = "pending";
-            $output['act'] = "RETRY";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
             $output['message'] = "Remitter eKYC is under process. Please wait or Do the completion.";
             $output['data']= $result['data'];
+            $this->logAndRespond($request, $output,$apiName,$url,'200');
         }
         else if($result['apistatus'] == 'REMITTER_EKYC_FAILED'){
             $output['status'] = "success";
-            $output['act'] = "RETRY";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
             $output['message'] = "Remitter eKYC failed. Please retry the RBL UIDAI verification again.";
             $output['data']= $result['data'];
+            $this->logAndRespond($request, $output,$apiName,$url,'200');
         }else {
             $output['status'] = "failed";
-            $output['act'] = "TERMINATE";
             $output['apistatus']='API_CALLFAILED';
             $output['message']= "Unknown resposne received. Please try again";
-            return response()->json($output,400);
+            $this->logAndRespond($request, $output,$apiName,$url,'200');
         }
         return response()->json($output,200);
     
     }
     public function remitterEkycProcess(Request $request)
     {
-      //  dd($request->ekycdata);
-      $rules=array(
+        $url = $request->url();
+        $uriSegments = explode('/', $url);
+        $uriSegments = array_filter($uriSegments);
+        $apiName= end($uriSegments);
+        $validateData=self::checkIndonepalAuth($request);
+       
+        if($validateData["status"]!="success"){
+
+            $this->logAndRespond($request, $validateData,$apiName,$url,'200');
+            return response()->json(['status' => 'failed','message' => $validateData['message']], 200);
+        }
+        $rules=array(
                 // 'remitterId' => 'required',
                 // 'referenceKey' => 'required',
                 'remitterId' => 'required|numeric',
@@ -781,12 +938,13 @@ class IndoNepalApiDmtController extends Controller
                 'ekycdata' => 'required'
             );
             $validator = \Validator::make($request->all(),$rules);
-            if($validator->fails()){
-             foreach($validator->errors()->messages() as $key => $value){
-                 $error = $value[0];
-             }
-             return response()->json(['status' => 'failed','message' => $error, 'act'=>'RETRY'], 400);
-            }
+         if($validator->fails()){
+          foreach($validator->errors()->messages() as $key => $value){
+              $error = $value[0];
+          }
+          $this->logAndRespond($request, $error,$apiName,$url,'200');
+          return response()->json(['status' => 'failed','message' => $error], 200);
+         }
         $data['api']="indonepalremitterEkycProcess";
         $data["via"]="api";
        // $data["authenticationKey"] =$request->authenticationKey;
@@ -796,61 +954,72 @@ class IndoNepalApiDmtController extends Controller
        
         $mockmode = false;
         $mockmodestatus="SUCCESS";//FAILED,PENDING
-        $result = \DmtApiv5::remitterEkycProcess($data, $mockmode,$mockmodestatus);
+        $result = \DmtApiv5::remitterEkycProcess($data, $mockmode,$validateData['mockmodestatus']);
         if($result['apistatus'] == 'REMITTER_EKYC_SUCCESS'){
             $updateRemitterReport=IndoNepalRemitters::where('remitter_id',$request->remitterId)->where('user_id',\Auth::id())
             ->update([
-            'status' =>'ekyc_done'
+            'status' =>'ekyc_done',
+            'rdsVer' =>$result['rdsVer']
                  ]);
         }
         else{
             $updateRemitterReport=IndoNepalRemitters::where('remitter_id',$request->remitterId)->where('user_id',\Auth::id())
             ->update([
-            'status' =>'ekyc_pending'
+            'status' =>'ekyc_pending',
+            'rdsVer' =>$result['rdsVer']
                  ]);
         }
        
         if($result['apistatus'] == 'REMITTER_EKYC_SUCCESS'){ 
             $output['status'] = "success";
-            $output['act'] = "CONTINUE";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
             $output['message'] = "Biometric eKYC completed successfully.";
             $output['data']= $result['data'];
-            
+            $this->logAndRespond($request, $output,$apiName,$url,'200');
         }
         else if($result['apistatus'] == 'REMITTER_EKYC_UNDER_PROCESS'){
             
             $output['status'] = "success";
-            $output['act'] = "RETRY";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
             $output['message'] = "Biometric eKYC is still processing. Please wait.";
             $output['data']= $result['data'];
+            $this->logAndRespond($request, $output,$apiName,$url,'200');
         }
         else if($result['apistatus'] == 'REMITTER_EKYC_FAILED'){
             $output['status'] = "success";
-            $output['act'] = "RETRY";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
             $output['message'] = "Biometric eKYC failed. Please try again.";
             $output['data']= $result['data'];
+            $this->logAndRespond($request, $output,$apiName,$url,'200');
         }else {
             $output['status'] = "failed";
-            $output['act'] = "TERMINATE";
             $output['apistatus']='API_CALLFAILED';
             $output['message']= "Unknown resposne received. Please try again";
-            return response()->json($output,400);
+            $this->logAndRespond($request, $output,$apiName,$url,'200');
         }
         return response()->json($output,200);
     
     }
     public function remitterUpdate(Request $request)
     {
+        $url = $request->url();
+        $uriSegments = explode('/', $url);
+        $uriSegments = array_filter($uriSegments);
+        $apiName= end($uriSegments);
+        $validateData=self::checkIndonepalAuth($request);
+       
+        if($validateData["status"]!="success"){
+
+            $this->logAndRespond($request, $validateData,$apiName,$url,'200');
+            return response()->json(['status' => 'failed','message' => $validateData['message']], 200);
+        }
         $rules=array(
-            'remitterType' => 'required',
-            'incomeSourceType' => 'required',
-            'annualIncome' => 'required',
+            'remitterType' => 'required|numeric|in:1,2,3,4',
+            'incomeSourceType' => 'required|numeric|in:1,2,3,4,5,6',
+            'annualIncome' => 'required|numeric|in:1,2,3,4',
             'remitterId' => 'required'
         );
         $validator = \Validator::make($request->all(),$rules);
@@ -858,7 +1027,8 @@ class IndoNepalApiDmtController extends Controller
              foreach($validator->errors()->messages() as $key => $value){
                  $error = $value[0];
              }
-             return response()->json(['status' => 'failed','message' => $error, 'act'=>'RETRY'], 400);
+             $this->logAndRespond($request, $error,$apiName,$url,'200');
+          return response()->json(['status' => 'failed','message' => $error], 200);
             }
         $data['api']="indonepalremitterUpdate";
         $data["via"]="api";
@@ -868,76 +1038,207 @@ class IndoNepalApiDmtController extends Controller
         $data["remitterId"] =$request->remitterId;
         $mockmode = false;
         $mockmodestatus="SUCCESS";//FAILED,PENDING
-        $result = \DmtApiv5::remitterUpdate($data, $mockmode,$mockmodestatus);
-        dd($result);
+        $result = \DmtApiv5::remitterUpdate($data, $mockmode,$validateData['mockmodestatus']);
+        if($result['apistatus'] == 'REMITTER_UPDATE_SUCCESS'){
+
+          
+            $output['status'] = "success";
+            $output['apistatus']=$result['apistatus'];
+            $output['apiremark']=$result['apiremark'];
+            $output['message'] = "Remitter Updated successfully";
+            $output['data']= $result['data'];
+            $this->logAndRespond($request, $output,$apiName,$url,'200');
+            
+        }
+        else if($result['apistatus'] == 'REMITTER_UPDATE_FAILED'){
+           
+            $output['status'] = "success";
+            $output['apistatus']=$result['apistatus'];
+            $output['apiremark']=$result['apiremark'];
+            $output['message'] = "Remitter registration is pending";
+            $output['data']= $result['data'];
+            $this->logAndRespond($request, $output,$apiName,$url,'200');
+        }
+        else {
+           
+            $output['status'] = "failed";
+            $output['apistatus']='API_CALLFAILED';
+            $output['message']= "Unknown resposne received. Please try again";
+            $this->logAndRespond($request, $output,$apiName,$url,'200');
+        }
+        
+        return response()->json($output,200);
     
     }
     public function beneficiaryRegistration(Request $request)
     {
-        
-        $rules=array(
+        $url = $request->url();
+        $uriSegments = explode('/', $url);
+        $uriSegments = array_filter($uriSegments);
+        $apiName= end($uriSegments);
+        $validateData=self::checkIndonepalAuth($request);
+       
+        if($validateData["status"]!="success"){
+
+            $this->logAndRespond($request, $validateData,$apiName,$url,'200');
+            return response()->json(['status' => 'failed','message' => $validateData['message']], 200);
+        }
+        if($request->operation=='Account Deposit')
+            {
+               
+           $rules=array(
             'remitterMobile' => 'required|numeric|digits:10', // Assuming mobile numbers are strings and maximum length is 15
-            'b_name' => 'required|string|max:255', // Assuming beneficiary name is a string with a maximum length of 255 characters
+            'name' => 'required|string|max:255', // Assuming beneficiary name is a string with a maximum length of 255 characters
             'gender' => 'required|in:Female,Male,Other', // Assuming gender must be one of these values
-            'b_mobile' => 'required|numeric|digits:10', // Assuming mobile numbers are strings and maximum length is 15
+            'mobile' => 'required|numeric|digits:10', // Assuming mobile numbers are strings and maximum length is 15
             'relationship' => 'required|string|max:255', // Assuming relationship is a string with a maximum length of 255 characters
             'address' => 'required|string|max:255', // Assuming address is a string with a maximum length of 255 characters
             'paymentMode' => 'required|in:Cash Payment,Account Deposit', // Assuming payment mode is a string with a maximum length of 255 characters
-            'bankBranchId' => 'required|numeric', // Assuming bank branch ID is a numeric value
-        );
+            'bankBranchId' => 'required|numeric',
+            'accountNumber'=> 'required|numeric', // Assuming bank branch ID is a numeric value
+            );
+           
+        }else{
+           
+            $rules=array(
+                'remitterMobile' => 'required|numeric|digits:10', // Assuming mobile numbers are strings and maximum length is 15
+                'name' => 'required|string|max:255', // Assuming beneficiary name is a string with a maximum length of 255 characters
+                'gender' => 'required|in:Female,Male,Other', // Assuming gender must be one of these values
+                'mobile' => 'required|numeric|digits:10', // Assuming mobile numbers are strings and maximum length is 15
+                'relationship' => 'required|string|max:255', // Assuming relationship is a string with a maximum length of 255 characters
+                'address' => 'required|string|max:255', // Assuming address is a string with a maximum length of 255 characters
+                'paymentMode' => 'required|in:Cash Payment,Account Deposit', // Assuming payment mode is a string with a maximum length of 255 characters
+                'bankBranchId' => 'required|numeric', // Assuming bank branch ID is a numeric value
+            );
+               
+           }
+       
         $validator = \Validator::make($request->all(),$rules);
         if($validator->fails()){
          foreach($validator->errors()->messages() as $key => $value){
              $error = $value[0];
          }
-         return response()->json(['status' => 'failed','message' => $error, 'act'=>'RETRY'], 400);
+         $this->logAndRespond($request, $error,$apiName,$url,'200');
+          return response()->json(['status' => 'failed','message' => $error], 200);
         }
         $data['api']="indonepalbeneficiaryRegistration";
         $data["via"]="api";
         $data["remitterMobile"]=$request->remitterMobile; 
-        $data["name"]=$request->b_name;
+        $data["name"]=$request->name;
         $data["gender"]=$request->gender;
-        $data["mobile"]=$request->b_mobile;
+        $data["mobile"]=$request->mobile;
         $data["relationship"]=$request->relationship;
         $data["address"]=$request->address;
         $data["paymentMode"]=$request->paymentMode;/* Payment mode Account Deposite then branch id and account number Mandatory*/
         $data["bankBranchId"]=$request->bankBranchId;
-        $data["accountNumber"]=$request->accountno;
-        $mockmode = false;
+        $data["accountNumber"]=$request->accountNumber;
+        $mockmode = true;
         //dd($data);
         $mockmodestatus="SUCCESS";//FAILED,PENDING
-        $result = \DmtApiv5::beneficiaryRegistration($data, $mockmode,$mockmodestatus);
+        $remittercheck = IndoNepalRemitters::where('mobile',$request->remitterMobile)->first();
+        
+        if(!isset($remittercheck))
+        {
+            //dd('kkkk');
+            $output['status'] = "success";
+            $output['apistatus']='NOT_REGISTERED';
+            $output['message']="For adding the beneficiary, the remitter's mobile number is not registered.";
+            $output['apiremark']= $output['message'];
+           
+            $this->logAndRespond($request, $output,$apiName,$url,'200');
+            return response()->json($output, 200);
+        }
+        $result = \DmtApiv5::beneficiaryRegistration($data, $mockmode,$validateData['mockmodestatus']);
        
+        if(!empty($result['data']))
+       {
+       
+        $remdata['id']=$result['data']->id;
+        $remdata['mobile']=$result['data']->mobile;
+        $remdata['firstName']=$result['data']->firstName;
+        $remdata['gender']=$result['data']->gender;
+        $remdata['dob']=$result['data']->dob;
+        $remdata['address']=$result['data']->address;
+        $remdata['city']=$result['data']->city;
+        $remdata['state']=$result['data']->state;
+        $remdata['district']=$result['data']->district;
+        $remdata['nationality']=$result['data']->nationality;
+        $remdata['employer']=$result['data']->employer;
+        $remdata['incomeSource']=$result['data']->incomeSource;
+        $remdata['status']=$result['data']->status;
+        $remdata['beneficiaries']=$result['data']->beneficiaries;
+        $remdata['ids']=$result['data']->ids[0];
+       
+        }else{
+            $remdata=[];
+        }
         if($result['apistatus'] == 'BENEFICIARY_REGISTER_SUCCESSFULLY'){ 
             $output['status'] = "success";
-            $output['act'] = "CONTINUE";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
             $output['message'] = "Beneficiary Added Successfully";
-            $output['data']= $result['data'];
-            
+            $output['data']= $remdata;
+            $this->logAndRespond($request, $output,$apiName,$url,'200');
         }
         else if($result['apistatus'] == 'BENEFICIARY_REGISTER_FAILED'){
             
             $output['status'] = "success";
-            $output['act'] = "RETRY";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
             $output['message'] = "Not able to add the Beneficiary please add valid data";
-            $output['data']= $result['data'];
+            $output['data']= $remdata;
+            $this->logAndRespond($request, $output,$apiName,$url,'200');
         }
         else {
             $output['status'] = "failed";
-            $output['act'] = "TERMINATE";
             $output['apistatus']='API_CALLFAILED';
             $output['message']= "Unknown resposne received. Please try again";
-            return response()->json($output,400);
+            $this->logAndRespond($request, $output,$apiName,$url,'200');
         }
         return response()->json($output,200);
     
     }
     public function serviceCharge(Request $request)
     {
+        $url = $request->url();
+        $uriSegments = explode('/', $url);
+        $uriSegments = array_filter($uriSegments);
+        $apiName= end($uriSegments);
+        $validateData=self::checkIndonepalAuth($request);
+       
+        if($validateData["status"]!="success"){
+
+            $this->logAndRespond($request, $validateData,$apiName,$url,'200');
+            return response()->json(['status' => 'failed','message' => $validateData['message']], 200);
+        }
+        if($request->transferAmount)
+        {
+            $rules=array(
+                'country' => 'required|string', 
+                'transferAmount' => 'required|numeric|min:0', 
+                'paymentMode' => 'required|in:Cash Payment,Account Deposit', 
+                'bankBranchId' => 'required|numeric', 
+            );
+               
+           
+       
+        }else{
+            $rules=array(
+                'country' => 'required|string', 
+                'payoutAmount' => 'required|numeric', 
+                'paymentMode' => 'required|in:Cash Payment,Account Deposit', 
+                'bankBranchId' => 'required|numeric', 
+            );
+        }
+       
+        $validator = \Validator::make($request->all(),$rules);
+        if($validator->fails()){
+        foreach($validator->errors()->messages() as $key => $value){
+            $error = $value[0];
+        }
+        $this->logAndRespond($request, $error,$apiName,$url,'200');
+        return response()->json(['status' => 'failed','message' => $error], 200);
+        }
         $data['api']="indonepalserviceCharge";
         $data["via"]="api";
         $data["country"]=$request->country;
@@ -947,32 +1248,51 @@ class IndoNepalApiDmtController extends Controller
         $data["bankBranchId"]=$request->bankBranchId;
         $mockmode = false;
         $mockmodestatus="SUCCESS";//FAILED,PENDING
-        $result = \DmtApiv5::serviceCharge($data, $mockmode,$mockmodestatus);
+        $result = \DmtApiv5::serviceCharge($data, $mockmode,$validateData['mockmodestatus']);
+        if(!empty($result['data']))
+       {
+       
+       
+        $remdata['transferAmount']=$result['data']->transferAmount;
+        $remdata['serviceCharge']=$result['data']->serviceCharge;
+        $remdata['collectionAmount']=$result['data']->collectionAmount;
+        $remdata['collectionCurrency']=$result['data']->collectionCurrency;
+        $remdata['exchangeRate']=$result['data']->exchangeRate;
+        $remdata['payoutAmount']=$result['data']->payoutAmount;
+        $remdata['payoutCurrency']=$result['data']->payoutCurrency;
+    
+       
+        }else{
+            $remdata=[];
+        }
         if($result['apistatus'] == 'DATA_FETCHED_SUCCESSFUL'){ 
             $output['status'] = "success";
-            $output['act'] = "CONTINUE";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
             $output['message'] = "Service charge retrieved successfully.";
-            $output['data']= $result['data'];
-            
+            $output['transferAmount']=$remdata['transferAmount'];
+            $output['serviceCharge']=$remdata['serviceCharge'];
+            $output['collectionAmount']=$remdata['collectionAmount'];
+            $output['exchangeRate']=$remdata['exchangeRate'];
+            $output['payoutAmount']=$remdata['payoutAmount'];
+            $output['payoutCurrency']=$remdata['payoutCurrency'];
+            $this->logAndRespond($request, $output,$apiName,$url,'200');
         }
        
         else if($result['apistatus'] == 'DATA_FETCHED_FAILED'){
             
             $output['status'] = "success";
-            $output['act'] = "RETRY";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
             $output['message'] = "Unable to Fetch the service Charge";
-            $output['data']= $result['data'];
+            $output['data']= $remdata;
+            $this->logAndRespond($request, $output,$apiName,$url,'200');
         }
         else {
             $output['status'] = "failed";
-            $output['act'] = "TERMINATE";
             $output['apistatus']='API_CALLFAILED';
             $output['message']= "Unknown resposne received. Please try again";
-            return response()->json($output,400);
+            $this->logAndRespond($request, $output,$apiName,$url,'200');
         }
         return response()->json($output,200);
     
@@ -981,8 +1301,19 @@ class IndoNepalApiDmtController extends Controller
     }
     public function fundTransfer(Request $request)
     {
-      
+        $url = $request->url();
+        $uriSegments = explode('/', $url);
+        $uriSegments = array_filter($uriSegments);
+        $apiName= end($uriSegments);
+        $validateData=self::checkIndonepalAuth($request);
+       
+        if($validateData["status"]!="success"){
+
+            $this->logAndRespond($request, $validateData,$apiName,$url,'200');
+            return response()->json(['status' => 'failed','message' => $validateData['message']], 200);
+        }
         $rules=array(
+            'externalRef' => 'required',
             'remitterMobile' => 'required|numeric|digits:10', 
             'beneficiaryId' => 'required|numeric', 
             'transferAmount' => 'required|numeric|min:0', 
@@ -996,7 +1327,8 @@ class IndoNepalApiDmtController extends Controller
          foreach($validator->errors()->messages() as $key => $value){
              $error = $value[0];
          }
-         return response()->json(['status' => 'failed','message' => $error, 'act'=>'RETRY'], 400);
+         $this->logAndRespond($request, $error,$apiName,$url,'200');
+         return response()->json(['status' => 'failed','message' => $error], 200);
         }
         $data['api']="indonepalfundTransfer";
         $data["via"]="api";
@@ -1013,10 +1345,10 @@ class IndoNepalApiDmtController extends Controller
         $data["remittanceReason"]=$request->remittanceReason;
         $data["otpReference"]=$request->otpReference;
         $data["otp"]=$request->otp;
-        $data["latitude"]="10.0000";
-        $data["longitude"]="20.0000";
-        //$data["latitude"]=$request->latitude;
-        //$data["longitude"]=$request->longitude;
+        //$data["latitude"]="10.0000";
+       // $data["longitude"]="20.0000";
+        $data["latitude"]=$request->latitude;
+        $data["longitude"]=$request->longitude;
         $mockmode = true;
         $mockmodestatus="FAILED";//FAILED,PENDING,SUCCESS
         if($request->receiver_paymentMode=='Cash Payment')
@@ -1025,30 +1357,33 @@ class IndoNepalApiDmtController extends Controller
         }else{
             $paymentMode='accountdeposit';
         }
-        $instantPayReportDmt =ReportDmt::create([
-            'mobile'=>$request->remitterMobile,
-            'txnid'=>$data["externalRef"],
-            'sender_name'=>$request->sen_name,
-            'beneficiary_id'=>$request->beneficiaryId,
-            'beneficiary_name'=>$request->b_name,
-            'beneficiary_account'=>$request->rec_account,
-            'beneficiary_bankid'=>$request->rec_bankBranchId,
-            'amount'=>$request->transferAmount,
-            'transfer_mode'=>$paymentMode,
-            'charge'=>$request->service_rate,
-            'status'=>'pending',
-            'source'=>'s2p',
-            'api_id'=>'110',
-            'via'=>$data["via"],
-            'lat'=>"10.0000",
-            'lon'=>"20.0000",
-            'user_id'=>\Auth::id(),
-            'ip'=>getHostByName(getHostName()),
-        ]);
-        $reportDmtinsertedId = $instantPayReportDmt->id;
-        $result = \DmtApiv5::fundTransfer($data, $mockmode,$mockmodestatus);
+        $remitter = IndoNepalRemitters::where('mobile',$request->remitterMobile)->first();
+           //dd($remitter->name);
+           $create['mobile']=$request->remitterMobile;
+           $create['txnid']=$request['txnid'];
+           $create['sender_name']=$remitter->name;
+           $create['beneficiary_id']=$request->beneficiaryId;
+          // $create['beneficiary_name']=$request->b_name;
+          // $create['beneficiary_account']=$request->rec_account;
+          // $create['beneficiary_bankid']=$request->beneficiaryId;
+           $create['amount']=$request->transferAmount;
+           $create['transfer_mode']=$paymentMode;
+          // $create['charge']=$request->service_rate;
+           $create['status']='pending';
+           $create['source']='s2p';
+           $create['api_id']='110';
+           $create['via']=$data["via"];
+           $create['lat']="10.0000";
+           $create['lon']="20.0000";
+           $create['user_id']=$request->user_id;
+           $create['ip']=$request->ip();
         
+        $instantPayReportDmt =ReportDmt::create($create);
+        $reportDmtinsertedId = $instantPayReportDmt->id;
+        $result = \DmtApiv5::fundTransfer($data, $mockmode,$validateData['mockmodestatus']);
         if($result['apistatus'] == 'TRANSFER_SUCCESSFUL'){ 
+            if($result['data'])
+            {
             $updateFundTransfer=ReportDmt::where('id',$reportDmtinsertedId)->where('user_id',\Auth::id())
             ->update([
             'status' =>'success',
@@ -1056,8 +1391,8 @@ class IndoNepalApiDmtController extends Controller
             'refno'=>$result['data']->txnReferenceId,
             'refno2'=>$result['data']->poolReferenceId
                  ]);
+            }
             $output['status'] = "success";
-            $output['act'] = "CONTINUE";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
             $output['message'] ="Your transaction was successful.";
@@ -1065,8 +1400,11 @@ class IndoNepalApiDmtController extends Controller
                 unset($result['data']->pool);
             }
             $output['data']= $result['data'];
+            $this->logAndRespond($request, $output,$apiName,$url,'200');
         }
         else if($result['apistatus'] == 'TRANSFER_PENDING'){
+            if($result['data'])
+            {
             $updateFundTransfer=ReportDmt::where('id',$reportDmtinsertedId)->where('user_id',\Auth::id())
             ->update([
             'status' =>'pending',
@@ -1074,8 +1412,8 @@ class IndoNepalApiDmtController extends Controller
             'refno'=>$result['data']->txnReferenceId,
             'refno2'=>$result['data']->poolReferenceId
                  ]);
+                }
             $output['status'] = "success";
-            $output['act'] = "TERMINATE";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
             $output['message'] = "Your transaction is under progress. Please wait.";
@@ -1083,9 +1421,12 @@ class IndoNepalApiDmtController extends Controller
                  unset($result['data']->pool);
             }
             $output['data']= $result['data'];
+            $this->logAndRespond($request, $output,$apiName,$url,'200');
            
         }
         else if($result['apistatus'] == 'TRANSFER_FAILED'){
+            if($result['data'])
+            {
             $updateFundTransfer=ReportDmt::where('id',$reportDmtinsertedId)->where('user_id',\Auth::id())
             ->update([
             'status' =>'failed',
@@ -1093,8 +1434,8 @@ class IndoNepalApiDmtController extends Controller
             'refno'=>$result['data']->txnReferenceId,
             'refno2'=>$result['data']->poolReferenceId
                  ]);
+            }
             $output['status'] = "success";
-            $output['act'] = "RETRY";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
             $output['message'] = "Transaction Failed";
@@ -1102,21 +1443,15 @@ class IndoNepalApiDmtController extends Controller
                 unset($result['data']->pool);
             }
             $output['data']= $result['data'];
+            $this->logAndRespond($request, $output,$apiName,$url,'200');
            
         }
         else {
-            $updateFundTransfer=ReportDmt::where('id',$reportDmtinsertedId)->where('user_id',\Auth::id())
-            ->update([
-            'status' =>'failed',
-            'apiremark'=>$result['apiremark'],
-            'refno'=>$result['data']->txnReferenceId,
-            'refno2'=>$result['data']->poolReferenceId
-                 ]);
+            
             $output['status'] = "failed";
-            $output['act'] = "TERMINATE";
             $output['apistatus']='API_CALLFAILED';
             $output['message']= "Unknown resposne received. Please try again";
-            return response()->json($output,400);
+            $this->logAndRespond($request, $output,$apiName,$url,'200');
         }
         return response()->json($output,200);
     
@@ -1124,8 +1459,21 @@ class IndoNepalApiDmtController extends Controller
     }
     public function fetchTransactionStatus(Request $request)
     {
+        $url = $request->url();
+        $uriSegments = explode('/', $url);
+        $uriSegments = array_filter($uriSegments);
+        $apiName= end($uriSegments);
+        $validateData=self::checkIndonepalAuth($request);
+       
+        if($validateData["status"]!="success"){
+
+            $this->logAndRespond($request, $validateData,$apiName,$url,'200');
+            return response()->json(['status' => 'failed','message' => $validateData['message']], 200);
+        }
         $rules=array(
-            'ipayId' => 'required',
+           'ipayId' => 'required',
+           'latitude' => 'required',
+           'longitude' => 'required',
             
         );
         $validator = \Validator::make($request->all(),$rules);
@@ -1133,18 +1481,19 @@ class IndoNepalApiDmtController extends Controller
          foreach($validator->errors()->messages() as $key => $value){
              $error = $value[0];
          }
-         return response()->json(['status' => 'failed','message' => $error, 'act'=>'RETRY'], 400);
+         $this->logAndRespond($request, $error,$apiName,$url,'200');
+         return response()->json(['status' => 'failed','message' => $error], 200);
         }
         $data['api']="indonepalfetchTransactionStatus";
         $data["via"]="api";
         $data["ipayId"]=$request->ipayId;
-        // $data["latitude"]=$request->latitude;
-        // $data["longitude"]=$request->longitude;
-        $data["latitude"]="10.0000";
-        $data["longitude"]="20.0000";
+        $data["latitude"]=$request->latitude;
+        $data["longitude"]=$request->longitude;
+       // $data["latitude"]="10.0000";
+        //$data["longitude"]="20.0000";
         $mockmode = true;
         $mockmodestatus="PENDING";//FAILED,PENDING,SUCCESS
-        $result = \DmtApiv5::fetchTransactionStatus($data, $mockmode,$mockmodestatus);
+        $result = \DmtApiv5::fetchTransactionStatus($data, $mockmode,$validateData['mockmodestatus']);
         if($result['apistatus'] == 'TRANSFER_SUCCESSFUL'){ 
             $updateFundTransfer=ReportDmt::where('refno2',$request->ipayId)->where('user_id',\Auth::id())
             ->update([
@@ -1152,7 +1501,6 @@ class IndoNepalApiDmtController extends Controller
             'apiremark'=>$result['apiremark'],
                  ]);
             $output['status'] = "success";
-            $output['act'] = "CONTINUE";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
             $output['message'] ="Your transaction was successful.";
@@ -1168,7 +1516,6 @@ class IndoNepalApiDmtController extends Controller
             'apiremark'=>$result['apiremark'],
                  ]);
             $output['status'] = "success";
-            $output['act'] = "TERMINATE";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
             $output['message'] = "Your transaction is under progress. Please wait.";
@@ -1176,7 +1523,7 @@ class IndoNepalApiDmtController extends Controller
                  unset($result['data']->pool);
             }
             $output['data']= $result['data'];
-           
+            $this->logAndRespond($request, $output,$apiName,$url,'200');
         }
         else if($result['apistatus'] == 'TRANSFER_FAILED'){
             $updateFundTransfer=ReportDmt::where('refno2',$request->ipayId)->where('user_id',\Auth::id())
@@ -1185,7 +1532,6 @@ class IndoNepalApiDmtController extends Controller
             'apiremark'=>$result['apiremark'],
                  ]);
             $output['status'] = "success";
-            $output['act'] = "RETRY";
             $output['apistatus']=$result['apistatus'];
             $output['apiremark']=$result['apiremark'];
             $output['message'] = "Transaction Failed";
@@ -1193,7 +1539,7 @@ class IndoNepalApiDmtController extends Controller
                 unset($result['data']->pool);
             }
             $output['data']= $result['data'];
-           
+            $this->logAndRespond($request, $output,$apiName,$url,'200');
         }
         else {
             $updateFundTransfer=ReportDmt::where('refno2',$request->ipayId)->where('user_id',\Auth::id())
@@ -1202,10 +1548,10 @@ class IndoNepalApiDmtController extends Controller
             'apiremark'=>$result['apiremark'],
                  ]);
             $output['status'] = "failed";
-            $output['act'] = "TERMINATE";
+           
             $output['apistatus']='API_CALLFAILED';
             $output['message']= "Unknown resposne received. Please try again";
-            return response()->json($output,400);
+            $this->logAndRespond($request, $output,$apiName,$url,'400');
         }
         return response()->json($output,200);
     
@@ -1213,181 +1559,36 @@ class IndoNepalApiDmtController extends Controller
     public function logAndRespond($request, $response,$api="none",$url="none",$code='200')
     {
         $txnID=rand();
-        $instantPaydataReport =IndoNepalDmtApilogs::create(['product'=>$api,
-        'url'=>$url,
-        'responsecode'=>$code,
-        'request'=>json_encode($request->all()),
-        'response'=>json_encode($response),
-        'txnid'=>$txnID,
-        'source'=>'api',
-        'user_id'=>$request->user_id,
-     ]);
-     if($instantPaydataReport) {
-        $output["status"]="success";
-        $output["message"]="Request processing success.";
-        return $output;        
-    }else{
-        $output["status"]="failed";
-        $output["message"]="Request processing failed. Please contact admin .";
-        return $output;
-    }
-        
+        $createdata['product']=$api;
+        $createdata['url']=$url;
+        $createdata['responsecode']=$code;
+        $createdata['request']=json_encode($request->all());
+        $createdata['response']=json_encode($response);
+        $createdata['txnid']=$txnID;
+        $createdata['source']='api';
+        $createdata['user_id']=$request->user_id;
+        $instantPaydataReport =IndoNepalDmtApilogs::create($createdata);
+            if($instantPaydataReport) {
+                $output["status"]="success";
+                $output["message"]="Request processing success.";
+                return $output;        
+            }else{
+                $output["status"]="failed";
+                $output["message"]="Request processing failed. Please contact admin .";
+                return $output;
+            }
         
     }
     public function transcode()
     {
-    $code = \DB::table('companies')->where('domain', $_SERVER['HTTP_HOST'])->first();
+     $code = \DB::table('companies')->where('domain', $_SERVER['HTTP_HOST'])->first();
         if($code){
       return $code->txnprefix;
         }else{
             return "SECP";
         }
     }
-    public function indoNepalRemitterRegister(Request $request)
-    {
-           
-        if(\Auth::check())
-        {   
-            $session_value = session()->all();
-            if($request->mobile)
-            {
-                $mobile =$request->mobile;
-            }else{
-                $mobile =$session_value['rem_mobileNo'];
-            }
-         
-            $user_id=\Auth::id();
-            $statedata = IndiaStateDistrict::distinct()->select('state','stateCode')->get();
-            $remitterInfo = IndoNepalRemitters::where('user_id',$user_id)->where('mobile',$mobile)->first();
-            $version_value  = Global_Settings::get();
-            $data['statedata']=$statedata;
-            $data['remitterInfo']=$remitterInfo;
-            $data['mobile']=$mobile;
-            $data['version_value']=$version_value;
-            if(isset($remitterInfo)){
-              
-            if( $remitterInfo->status=="pending") {
-                $data["isEditable"]=true;
-            }
-            else{
-                $data["isEditable"]=false;
-            }
-        }else{
-            $data["isEditable"]=true;
-        }
-           //dd($data['version_value']);
-            return view('frontend.remitterRegister',compact('data'));//blank
-        }
-        return redirect()->route('signIn')
-            ->withErrors([
-            'email' => 'Please login to Again.',
-        ])->onlyInput('email');   
-    }
-    public function getDistrict(Request $request)
-    {
-       // dd($request->statecode);
-       sleep(5);
-            $data = IndiaStateDistrict::where('stateCode',$request->statecode)->distinct()->pluck('district');
-          
-           $output['status']='success';
-           $output['message']='District Fetch Successfully';
-           $output['apiremark']='District Fetch Successfully';
-           $output['act']='CONTINUE';
-           $output['data']=$data;
-            return response()->json($output);
-    }
-    public function indoNepalDMT()
-    {
-        if(\Auth::check())
-        {    
-            $statedata = NepalStateDistrict::distinct()->select('state','stateCode')->get();
-            $data['statedata']=$statedata;
-            return view('frontend.instantPay',compact('data'));
-            //return view('frontend.instantPay');//blank
-        }
-        return redirect()->route('signIn')
-            ->withErrors([
-            'email' => 'Please login to Again.',
-        ])->onlyInput('email');   
-    }
-    public function getNepalDistrict(Request $request)
-    {
-       // dd($request->statecode);
-            $data = NepalStateDistrict::where('state',$request->state)->distinct()->pluck('district');
-           // dd($data);
-           $output['status']='success';
-           $output['message']='District Fetch Successfully';
-           $output['apiremark']='District Fetch Successfully';
-           $output['act']='CONTINUE';
-           $output['data']=$data;
-            return response()->json($output);
-    }
-    public function addBeneficiaryOtp(Request $request)
-    {
-        $session_value = session()->all();
-        $rules=array(
-            'name' => 'required|string|max:255',
-            'mobile' => 'required|numeric|digits:10',
-        );
-        $validator = \Validator::make($request->all(),$rules);
-        if($validator->fails()){
-         foreach($validator->errors()->messages() as $key => $value){
-             $error = $value[0];
-         }
-         return response()->json(['status' => 'failed','message' => $error, 'act'=>'RETRY'], 400);
-        }
-        $sendsmsdata['header'] =  "SECPAY";//\MyHelper::getObjectValue("companies", "id", $companyid, "senderid"); 
-        $sendsmsdata['companyname'] = "Sec2pay";//\MyHelper::getObjectValue("companies", "id", $companyid, "sendername");
-        //Anuja 201023
-        $otp=rand(11111, 99999);
-        $sendsmsdata['otp']=$otp;
-        $sendsmsdata['name']=$request->name; //here add name
-        $sendsmsdata['action']=$request->action;
-        $sendsmsdata['submitotp']=$request->submitotp;
-        
-        $sendsmsdata['mobile']=$request->mobile;
-        $sendsmsdata['source']="WEB";  
-      // dd($sendsmsdata);
-       // $sendsms=\MyHelper::sendSMS('settlement_bank_add', $sendsmsdata);
-        $sendsms['status']='success';
-        if($sendsmsdata['action']=='VERIFY_OTP')
-        {
-            if($sendsmsdata['submitotp']==$session_value['beneotp']){
-            $output['status']='success';
-            $output['message']= "OTP has been verified successfully!";
-            $output['act']='CONTINUE';
-            $output['action']=$sendsmsdata['action'];
-            $output['apistatus']="OTP_VERIFIED";
-            $output['apiremark']=$output['message'];
-            
-           // Session::put('beneotp', $otp);
-            return response()->json($output,200);
-        }else{
-            return response()->json(['status' => 'failed','act' =>'RETRY','message' => 'Something Went wrong(STNF)','act'=>'TERMINATE'], 400);
-        }
-    }
-        
-    if($sendsmsdata['action']=='SEND_OTP'){
-        if($sendsms['status'] != "failed"){
-            
-           // dd($sendsmsdata);
-            $output['status']='success';
-            $output['message']= "OTP has been sent successfully!";
-            $output['act']='CONTINUE';
-            $output['otp']=$otp;
-            $output['action']=$sendsmsdata['action'];
-            $output['apistatus']="OTP_SEND";
-            $output['apiremark']=$output['message'];
-            
-            Session::put('beneotp', $otp);
-            return response()->json($output,200);
-        }else{
-            return response()->json(['status' => 'failed','act' =>'RETRY','message' => 'Something Went wrong(STNF)','act'=>'TERMINATE'], 400);
-        }
-    }
-
-      
-    }
+  
     
    
 }

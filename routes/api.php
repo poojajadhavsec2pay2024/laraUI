@@ -49,10 +49,10 @@ Route::prefix('indonepaldmt')->group(function () {
     Route::post('getoutletdetails', [IndoNepalApiDmtController::class, 'getOutletDetails']);
     Route::post('validateoutletdetails1', [IndoNepalApiDmtController::class, 'validateOutletDetails1']);
     Route::post('getvalidateoutletdetails', [IndoNepalApiDmtController::class, 'getValidateOutletDetails']);
-    Route::get('activationstatus', [IndoNepalApiDmtController::class, 'activationStatus'])->name('activationStatus');
-    Route::get('staticdata', [IndoNepalApiDmtController::class, 'staticData'])->name('staticData');
+    Route::post('activationstatus', [IndoNepalApiDmtController::class, 'activationStatus'])->name('activationStatus');
+    Route::post('staticdata', [IndoNepalApiDmtController::class, 'staticData'])->name('staticData');
     Route::post('paymentlocationList', [IndoNepalApiDmtController::class, 'paymentLocationList'])->name('paymentLocationList');
-    Route::get('statedistrict', [IndoNepalApiDmtController::class, 'stateDistrict'])->name('stateDistrict');
+    Route::post('statedistrict', [IndoNepalApiDmtController::class, 'stateDistrict'])->name('stateDistrict');
     Route::post('remitter/profile', [IndoNepalApiDmtController::class, 'remitterProfile'])->name('remitterProfile');
     Route::post('sendotp', [IndoNepalApiDmtController::class, 'sendOtp'])->name('sendOtp');
     Route::post('remitter/registration', [IndoNepalApiDmtController::class, 'remitterRegistration'])->name('remitterRegistration');

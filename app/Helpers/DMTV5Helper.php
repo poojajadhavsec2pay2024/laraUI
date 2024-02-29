@@ -1034,6 +1034,7 @@ class DMTV5Helper {
                 $output["message"]="External API call failed with ".$result["code"].'( ' .$resMessage->status.')';
                 $output['apiremark']=$output["message"];
                 $output["code"]=$result["code"]; 
+                $output['rdsVer']=$biometricData["rdsVer"];
                  return $output;
             }  
             $jsonD=json_decode(($result["response"]));
@@ -1049,6 +1050,7 @@ class DMTV5Helper {
             $output["message"]="Response parsing error from  external API";
             $output['apistatus']='API_CALLFAILED';
             $output['apiremark']=$output["message"];
+            $output['rdsVer']=$biometricData["rdsVer"];
             return $output;
         }
 
@@ -1059,6 +1061,7 @@ class DMTV5Helper {
            $output['message'] = "Remitter Ekyc Successful";
            $output['apiremark']=isset($jsonD->status) ? $jsonD->status : "NA";
            $output['data'] = $jsonD->data;
+           $output['rdsVer']=$biometricData["rdsVer"];
         }
         else if ($jsonD->statuscode=='TUP')   
         { 
@@ -1067,6 +1070,7 @@ class DMTV5Helper {
             $output['message']= "Remitter Ekyc Pending";
             $output['apiremark']= isset($jsonD->status) ? $jsonD->status : "NA";
             $output['data'] =isset($jsonD->data) ? $jsonD->data : [];
+            $output['rdsVer']=$biometricData["rdsVer"];
 
         }
         else if (in_array($jsonD->statuscode, ['IVC','ERR','RPI','ISE']))   
@@ -1076,6 +1080,7 @@ class DMTV5Helper {
             $output['message']= "Remitter Ekyc Failed.";
             $output['apiremark']= isset($jsonD->status) ? $jsonD->status : "NA";
             $output['data'] =isset($jsonD->data) ? $jsonD->data : [];
+            $output['rdsVer']=$biometricData["rdsVer"];
 
         }  else 
         {
@@ -1084,6 +1089,7 @@ class DMTV5Helper {
             $output['message']= "Unknown resposne received. Please try again";
             $output['apiremark']=$output['message'];
             $output['code']=$result["code"];
+            $output['rdsVer']=$biometricData["rdsVer"];
         }
         
         return $output;
@@ -1372,9 +1378,10 @@ class DMTV5Helper {
 
             if($result["code"]!=200){
                 $resMessage=json_decode($result['response']);
+               // dd($resMessage);
                 $output["status"]="success";
                 $output['apistatus']='FETCH_DATA_PENDING';
-                $output["message"]="External API call failed with ".$result["code"].'( ' .$resMessage->status.')';
+                $output["message"]="External API call failed with ".$result["code"].'( ' .$resMessage->message.')';
                 $output['apiremark']=$output["message"];
                 $output["code"]=$result["code"]; 
                 
